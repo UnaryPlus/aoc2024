@@ -1,14 +1,13 @@
 {-# LANGUAGE LambdaCase #-}
 
+module AoC2024 where
+
 import Data.List (sort, foldl')
 import Data.Map (Map)
 
 -- Answers for future reference:
 -- Day 1: 2285373, 21142653
 -- Day 2: 686, 717
-
-main :: IO ()
-main = print =<< day2Part2 <$> parse2
 
 alternate :: [a] -> ([a], [a])
 alternate = \case
