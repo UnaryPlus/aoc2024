@@ -3,6 +3,10 @@
 import Data.List (sort, foldl')
 import Data.Map (Map)
 
+-- Answers for future reference:
+-- Day 1: 2285373, 21142653
+-- Day 2: 686, 717
+
 main :: IO ()
 main = print =<< day2Part2 <$> parse2
 
@@ -14,9 +18,6 @@ alternate = \case
 
 count :: (a -> Bool) -> [a] -> Int
 count p = foldl' (\n x -> if p x then n + 1 else n) 0 
-
-multiplicity :: Eq a => a -> [a] -> Int
-multiplicity a = count (== a)
 
 differences :: Num a => [a] -> [a]
 differences = \case
