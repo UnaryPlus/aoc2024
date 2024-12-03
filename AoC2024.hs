@@ -126,14 +126,37 @@ natural = Parser $ \s ->
 mulInstruction :: Parser (Int, Int)
 mulInstruction = (,) <$ string "mul(" <*> natural <* char ',' <*> natural <* char ')'
 
+data Instruction = Do | Dont | Mul (Int, Int)
+  deriving (Show)
+
+doInstruction :: Parser Instruction
+doInstruction = Do <$ string "do()"
+
+dontInstruction :: Parser Instruction
+dontInstruction = Dont <$ string "don't()"
+
+instruction :: Parser Instruction
+instruction = doInstruction <|> dontInstruction <|> Mul <$> mulInstruction
+
+interpret :: [Instruction] -> Int
+interpret = fst . foldl' update (0, True)
+  where
+    update (n, enabled) = \case
+      Do -> (n, True)
+      Dont -> (n, False)
+      Mul (a, b) -> (if enabled then a * b + n else n, enabled)
+
 parse3 :: IO String
 parse3 = readFile "input/day3.txt"
 
 day3Part1 :: String -> Int
 day3Part1 str = let
-  result = execParser (many ((Just <$> mulInstruction) <|> (Nothing <$ anyChar))) str
+  result = execParser (many (Just <$> mulInstruction <|> Nothing <$ anyChar)) str
   pairs = catMaybes (fromMaybe [] result)
   in sum (map (uncurry (*)) pairs)
   
 day3Part2 :: String -> Int
-day3Part2 = undefined
+day3Part2 str = let
+  result = execParser (many (Just <$> instruction <|> Nothing <$ anyChar)) str
+  instrs = catMaybes (fromMaybe [] result)
+  in interpret instrs
