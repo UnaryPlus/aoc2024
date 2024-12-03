@@ -13,7 +13,7 @@ import Debug.Trace
 -- Answers for future reference:
 -- Day 1: 2285373, 21142653
 -- Day 2: 686, 717
--- Day 3: 174336360
+-- Day 3: 174336360, 88802350
 
 alternate :: [a] -> ([a], [a])
 alternate = \case
