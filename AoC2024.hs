@@ -2,18 +2,21 @@
 
 module AoC2024 where
 
-import Data.List (sort, foldl')
+import Data.List (sort, foldl', transpose, tails)
 import Data.Char (isDigit)
 import Data.Bifunctor (first)
-import Control.Applicative (Alternative(empty, (<|>), many))
+import Control.Applicative (Alternative(empty, (<|>), many), liftA2)
 import Control.Monad (MonadPlus)
 import Data.Maybe (fromMaybe, catMaybes)
+import Data.Vector (Vector, (!))
+import qualified Data.Vector as Vec
 import Debug.Trace
 
 -- Answers for future reference:
 -- Day 1: 2285373, 21142653
 -- Day 2: 686, 717
 -- Day 3: 174336360, 88802350
+-- Day 4: 2378, 1796
 
 alternate :: [a] -> ([a], [a])
 alternate = \case
@@ -160,3 +163,49 @@ day3Part2 str = let
   result = execParser (many (Just <$> instruction <|> Nothing <$ anyChar)) str
   instrs = catMaybes (fromMaybe [] result)
   in interpret instrs
+
+
+
+type Grid a = Vector (Vector a)
+
+dims :: Grid a -> (Int, Int)
+dims grid = (Vec.length grid, Vec.length (grid ! 0))
+
+entry :: (Int, Int) -> Grid a -> a
+entry (i, j) grid = grid ! i ! j
+
+add :: (Int, Int) -> (Int, Int) -> (Int, Int)
+add (i1, j1) (i2, j2) = (i1 + i2, j1 + j2)
+
+applyMask :: Functor f => (Int, Int) -> f (Int, Int) -> Grid a -> f a
+applyMask base mask grid = fmap (\ix -> entry (add base ix) grid) mask
+
+slideMask :: Functor f => (Int, Int) -> (Int, Int) -> f (Int, Int) -> Grid a -> [f a]
+slideMask (i0, j0) (i1, j1) mask grid = [ applyMask (i, j) mask grid | i <- [i0..i1], j <- [j0..j1] ]
+
+slideMasks :: Functor f => [((Int, Int), (Int, Int), f (Int, Int))] -> Grid a -> [f a]
+slideMasks masks grid = concatMap (\(ix0, ix1, mask) -> slideMask ix0 ix1 mask grid) masks
+
+parse4 :: IO (Grid Char)
+parse4 = Vec.fromList . map Vec.fromList . lines <$> readFile "input/day4.txt"
+
+day4Part1 :: Grid Char -> Int
+day4Part1 grid = let
+  (m, n) = dims grid
+  masks = 
+    [ ((0, 0), (m - 1, n - 4), [(0, 0), (0, 1), (0, 2), (0, 3)]) 
+    , ((0, 0), (m - 4, n - 1), [(0, 0), (1, 0), (2, 0), (3, 0)])
+    , ((0, 0), (m - 4, n - 4), [(0, 0), (1, 1), (2, 2), (3, 3)])
+    , ((0, 0), (m - 4, n - 4), [(0, 3), (1, 2), (2, 1), (3, 0)])
+    ]
+  in count ((== "XMAS") ||| (== "SAMX")) (slideMasks masks grid)
+
+day4Part2 :: Grid Char -> Int
+day4Part2 grid = let
+  (m, n) = dims grid
+  mask = Vec.fromList [(-1, -1), (-1, 1), (0, 0), (1, -1), (1, 1)]
+  exes = slideMask (1, 1) (m - 2, n - 2) mask grid
+  ms = [('M', 'S'), ('S', 'M')]
+  isXmas ex = ex ! 2 == 'A' && (ex ! 0, ex ! 4) `elem` ms && (ex ! 1, ex ! 3) `elem` ms
+  in count isXmas exes
+  
