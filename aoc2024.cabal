@@ -43,3 +43,10 @@ library
   
   build-depends: base, vector, containers
   
+test-suite test
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   test
+  default-language: Haskell2010
+  ghc-options:      -Wall
+  main-is:          Main.hs
+  build-depends:    base, aoc2024
