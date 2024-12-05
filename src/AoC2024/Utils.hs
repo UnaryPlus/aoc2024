@@ -31,3 +31,6 @@ infixr 2 |||
 faces :: [a] -> [[a]]
 faces [] = []
 faces (x:xs) = xs : map (x:) (faces xs)
+
+middle :: [a] -> a
+middle xs = xs !! (length xs `div` 2)

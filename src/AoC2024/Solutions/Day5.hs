@@ -10,9 +10,7 @@ import Data.Set (Set)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import AoC2024.Parser (execParser, char, natural, separatedBy)
-
-middle :: [a] -> a
-middle xs = xs !! (length xs `div` 2) 
+import AoC2024.Utils (middle)
 
 forbiddenNumbers :: Ord a => [(a, a)] -> Map a (Set a)
 forbiddenNumbers = Map.fromListWith Set.union . map (\(x, y) -> (y, Set.singleton x))
