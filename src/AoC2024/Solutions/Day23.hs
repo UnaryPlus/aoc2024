@@ -1,0 +1,1 @@
+module AoC2024.Solutions.Day23 () where

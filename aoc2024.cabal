@@ -1,0 +1,45 @@
+cabal-version:      2.4
+name:               aoc2024
+version:            0.1.0.0
+author:             Owen Bechtel
+maintainer:         ombspring@gmail.com
+
+extra-source-files:
+  README.md
+
+library
+  hs-source-dirs:   src
+  default-language: Haskell2010
+  ghc-options:      -Wall
+
+  exposed-modules:
+    AoC2024.Utils,
+    AoC2024.Parser,
+    AoC2024.Solutions.Day1,
+    AoC2024.Solutions.Day2,
+    AoC2024.Solutions.Day3,
+    AoC2024.Solutions.Day4,
+    AoC2024.Solutions.Day5,
+    AoC2024.Solutions.Day6,
+    AoC2024.Solutions.Day7,
+    AoC2024.Solutions.Day8,
+    AoC2024.Solutions.Day9,
+    AoC2024.Solutions.Day10, 
+    AoC2024.Solutions.Day11,
+    AoC2024.Solutions.Day12,
+    AoC2024.Solutions.Day13,
+    AoC2024.Solutions.Day14,
+    AoC2024.Solutions.Day15,
+    AoC2024.Solutions.Day16, 
+    AoC2024.Solutions.Day17,
+    AoC2024.Solutions.Day18,
+    AoC2024.Solutions.Day19,
+    AoC2024.Solutions.Day20,
+    AoC2024.Solutions.Day21,
+    AoC2024.Solutions.Day22,
+    AoC2024.Solutions.Day23,
+    AoC2024.Solutions.Day24,
+    AoC2024.Solutions.Day25
+  
+  build-depends: base, vector, containers
+  
