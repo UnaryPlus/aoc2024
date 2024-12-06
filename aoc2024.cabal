@@ -41,7 +41,7 @@ library
     AoC2024.Solutions.Day24,
     AoC2024.Solutions.Day25
   
-  build-depends: base, vector, containers
+  build-depends: base, array, containers
   
 test-suite test
   type:             exitcode-stdio-1.0
