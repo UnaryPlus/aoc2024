@@ -1,12 +1,11 @@
 module AoC2024.Solutions.Day4 (parse, part1, part2) where 
 
-import Data.Bifunctor (bimap)
 import Data.Array ((!))
 import qualified Data.Array as Array
-import AoC2024.Utils (count, (|||), Grid, fromList, dims)
+import AoC2024.Utils (count, (|||), add2, Grid, fromList, dims)
 
 applyMask :: Functor f => (Int, Int) -> f (Int, Int) -> Grid a -> f a
-applyMask (i, j) mask grid = fmap (\ix -> grid ! bimap (i+) (j+) ix) mask
+applyMask base mask grid = fmap (\ix -> grid ! add2 base ix) mask
 
 slideMask :: Functor f => (Int, Int) -> (Int, Int) -> f (Int, Int) -> Grid a -> [f a]
 slideMask (i0, j0) (i1, j1) mask grid = [ applyMask (i, j) mask grid | i <- [i0..i1], j <- [j0..j1] ]
