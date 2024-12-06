@@ -1,24 +1,12 @@
 module AoC2024.Solutions.Day4 (parse, part1, part2) where 
 
-import Data.Array (Array, (!))
+import Data.Bifunctor (bimap)
+import Data.Array ((!))
 import qualified Data.Array as Array
-import AoC2024.Utils (count, (|||))
-
-type Grid a = Array (Int, Int) a
-
-fromList :: [[a]] -> Grid a
-fromList rows =
-  let (m, n) = (length rows, length (head rows)) in
-  Array.listArray ((0, 0), (m - 1, n - 1)) (concat rows)
-
-dims :: Grid a -> (Int, Int)
-dims = add (1, 1) . snd . Array.bounds
-
-add :: (Int, Int) -> (Int, Int) -> (Int, Int)
-add (i1, j1) (i2, j2) = (i1 + i2, j1 + j2)
+import AoC2024.Utils (count, (|||), Grid, fromList, dims)
 
 applyMask :: Functor f => (Int, Int) -> f (Int, Int) -> Grid a -> f a
-applyMask base mask grid = fmap (\ix -> grid ! add base ix) mask
+applyMask (i, j) mask grid = fmap (\ix -> grid ! bimap (i+) (j+) ix) mask
 
 slideMask :: Functor f => (Int, Int) -> (Int, Int) -> f (Int, Int) -> Grid a -> [f a]
 slideMask (i0, j0) (i1, j1) mask grid = [ applyMask (i, j) mask grid | i <- [i0..i1], j <- [j0..j1] ]

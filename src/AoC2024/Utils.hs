@@ -3,6 +3,9 @@
 module AoC2024.Utils where
 
 import Data.List (foldl')
+import Data.Bifunctor (bimap)
+import Data.Array (Array)
+import qualified Data.Array as Array
 
 alternate :: [a] -> ([a], [a])
 alternate = \case
@@ -34,3 +37,13 @@ faces (x:xs) = xs : map (x:) (faces xs)
 
 middle :: [a] -> a
 middle xs = xs !! (length xs `div` 2)
+
+type Grid a = Array (Int, Int) a
+
+fromList :: [[a]] -> Grid a
+fromList rows =
+  let (m, n) = (length rows, length (head rows)) in
+  Array.listArray ((0, 0), (m - 1, n - 1)) (concat rows)
+
+dims :: Grid a -> (Int, Int)
+dims = bimap (1+) (1+) . snd . Array.bounds
