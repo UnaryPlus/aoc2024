@@ -3,10 +3,37 @@
 module AoC2024.Utils where
 
 import Data.List (foldl')
+import Data.Bifunctor (first)
 import Control.Monad.ST (runST, ST)
 import Data.Array (Array, Ix, inRange, (!))
 import Data.Array.ST (freeze, thaw, writeArray, STArray)
 import qualified Data.Array as Array
+
+updateMap :: (b -> a -> (b, a)) -> b -> [a] -> [a]
+updateMap f b = \case
+  [] -> []
+  x:xs -> let (b', x') = f b x in x' : updateMap f b' xs
+
+takeWhileM :: Monad m => (a -> m Bool) -> [a] -> m [a]
+takeWhileM p = \case
+  [] -> return []
+  x:xs -> do
+    px <- p x
+    if px then (x:) <$> takeWhileM p xs else return []
+
+dropWhileM :: Monad m => (a -> m Bool) -> [a] -> m [a]
+dropWhileM p = \case
+  [] -> return []
+  x:xs -> do
+    px <- p x
+    if px then dropWhileM p xs else return (x:xs)
+
+spanM :: Monad m => (a -> m Bool) -> [a] -> m ([a], [a])
+spanM p = \case
+  [] -> return ([], [])
+  x:xs -> do
+    px <- p x
+    if px then first (x:) <$> spanM p xs else return ([], x:xs)
 
 alternate :: [a] -> ([a], [a])
 alternate = \case
