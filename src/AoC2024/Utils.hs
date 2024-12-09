@@ -5,14 +5,21 @@ module AoC2024.Utils where
 import Data.List (foldl')
 import Data.Bifunctor (first)
 import Control.Monad.ST (runST, ST)
-import Data.Array (Array, Ix, inRange, (!))
-import Data.Array.ST (freeze, thaw, writeArray, STArray)
+import Control.Monad (forM_, filterM)
+import Data.Array (Array, Ix, range, inRange, (!))
+import Data.Array.ST (freeze, thaw, readArray, writeArray, getBounds, STArray)
 import qualified Data.Array as Array
+import Data.Array.Storable (modifyArray')
 
-updateMap :: (b -> a -> (b, a)) -> b -> [a] -> [a]
+require :: (a -> Bool) -> Maybe a -> Maybe a
+require p = \case
+  Nothing -> Nothing
+  Just x -> if p x then Just x else Nothing
+
+updateMap :: (c -> a -> (b, c)) -> c -> [a] -> [b]
 updateMap f b = \case
   [] -> []
-  x:xs -> let (b', x') = f b x in x' : updateMap f b' xs
+  x:xs -> let (x', b') = f b x in x' : updateMap f b' xs
 
 takeWhileM :: Monad m => (a -> m Bool) -> [a] -> m [a]
 takeWhileM p = \case
@@ -92,3 +99,13 @@ modifiedCopy i x arr = runST $ do
   mut <- (thaw :: Ix i => Array i a -> ST s (STArray s i a)) arr
   writeArray mut i x
   freeze mut
+
+modifyAll' :: Ix i => (a -> a) -> STArray s i a -> ST s ()
+modifyAll' f arr = do
+  ixs <- range <$> getBounds arr
+  forM_ ixs $ \i -> modifyArray' arr i f
+
+indicesWhere :: Ix i => (i -> a -> Bool) -> STArray s i a -> ST s [i]
+indicesWhere p arr = do
+  ixs <- range <$> getBounds arr
+  filterM (\i -> p i <$> readArray arr i) ixs

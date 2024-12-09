@@ -5,14 +5,10 @@ module AoC2024.Solutions.Day9 (parse, part1, part2) where
 import Data.Char (digitToInt, isDigit)
 import Data.List (foldl')
 import Data.Bifunctor (first)
-import Control.Monad (zipWithM)
+import Control.Monad (zipWithM, unless, forM_)
 import Control.Monad.ST (ST, runST)
-import Data.Array.ST (STArray, readArray, writeArray, newArray, freeze, thaw, getBounds)
-import Data.Array (Array, range, (!))
-import qualified Data.Array as Array
-import AoC2024.Utils (alternate, updateMap, dropWhileM)
-
-import Debug.Trace
+import Data.Array.ST (STArray, readArray, writeArray, newListArray)
+import AoC2024.Utils (require, alternate, modifyAll', indicesWhere, updateMap)
 
 splitBlocksAt :: Int -> [(a, Int)] -> ([(a, Int)], [(a, Int)])
 splitBlocksAt n xs
@@ -25,10 +21,7 @@ splitBlocksAt n xs
         | otherwise -> ([(x, n)], (x, k - n):rest)
 
 splitBlocks :: [Int] -> [(a, Int)] -> [[(a, Int)]]
-splitBlocks [] _ = []
-splitBlocks (n:ns) xs =
-  let (taken, dropped) = splitBlocksAt n xs 
-  in taken : splitBlocks ns dropped
+splitBlocks ns xs = updateMap (\acc n -> splitBlocksAt n acc) xs ns
 
 interleave :: [a] -> [[a]] -> [a]
 interleave = curry $ \case
@@ -45,24 +38,45 @@ checkSum :: [(Int, Int)] -> Int
 checkSum = snd . foldl' loop (0, 0)
   where loop (i, total) (x, n) = (i + n, total + checkSumTerm (x, i, n))
 
-findSpace :: STArray s Int (Int, Int) -> Int -> (Int, Int, Int) -> ST s (Int, Int, Int)
-findSpace gaps n file@(fileID, _, fileSize) = do
-  traceShowM n
-  gapIxs <- take n . range <$> getBounds gaps
-  rest <- dropWhileM (fmap ((< fileSize) . snd) . readArray gaps) gapIxs
-  case rest of
-    [] -> return file -- All gaps too small
-    i:_ -> do
+getIndices :: Monad m => (Int -> m Int) -> (Int, Int) -> (Int, Int) -> m [Maybe Int]
+getIndices = getIndices' []
+
+-- Tail recursive
+getIndices' :: Monad m => [Maybe Int] -> (Int -> m Int) -> (Int, Int) -> (Int, Int) -> m [Maybe Int]
+getIndices' prev f (imin, imax) (lowest, highest)
+  | imin > imax = return (prev ++ replicate (lowest - highest + 1) Nothing)
+  | otherwise = do
+    x <- f imin
+    if x < lowest then getIndices' prev f (imin + 1, imax) (lowest, highest)
+    else if x >= highest then return (prev ++ replicate (highest - lowest + 1) (Just imin))
+    else getIndices' (prev ++ replicate (x - lowest + 1) (Just imin)) f (imin + 1, imax) (x + 1, highest)
+
+-- Find space for a file among the first n gaps, and modify 'gaps' array if space is found
+-- 'indices' array is for efficiency; indices[s] is the index of the first gap of size >= s
+findSpace ::  STArray s Int (Maybe Int) -> STArray s Int (Int, Int) -> Int -> (Int, Int, Int) -> ST s (Int, Int, Int)
+findSpace indices gaps n file@(fileID, _, fileSize) = do
+  modifyAll' (require (< n)) indices
+  gapIx <- readArray indices fileSize
+  case gapIx of
+    Nothing -> return file
+    Just i -> do
       (gapStart, gapSize) <- readArray gaps i
       writeArray gaps i (gapStart + fileSize, gapSize - fileSize)
+      needUpdating <- indicesWhere (\fs j -> fs > gapSize - fileSize && j == Just i) indices
+      unless (null needUpdating) $ do
+        indices' <- getIndices (fmap snd . readArray gaps) (i + 1, n - 1) (minimum needUpdating, maximum needUpdating)
+        let updates = zip needUpdating indices'
+        forM_ updates (uncurry (writeArray indices))
       return (fileID, gapStart, fileSize)
 
 findSpaceAll :: [(Int, Int)] -> [(Int, Int, Int)] -> [(Int, Int, Int)]
 findSpaceAll gaps files = runST $ do
   let numGaps = length gaps
-  gaps' <- thaw (Array.listArray (0, numGaps - 1) gaps)
+  gapsArr <- newListArray (0, numGaps - 1) gaps
+  indices <- getIndices (fmap snd . readArray gapsArr) (0, numGaps - 1) (1, 9)
+  indicesArr <- newListArray (1, 9) indices
   let ns = map (numGaps -) [0..]
-  zipWithM (findSpace gaps') ns files
+  zipWithM (findSpace indicesArr gapsArr) ns files
 
 parse :: String -> ([Int], [Int])
 parse = alternate . map digitToInt . takeWhile isDigit
