@@ -76,7 +76,7 @@ middle xs = xs !! (length xs `div` 2)
 add2 :: Num a => (a, a) -> (a, a) -> (a, a)
 add2 (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
 
-type Grid a = Array (Int, Int) a
+type Grid = Array (Int, Int)
 
 fromList :: [[a]] -> Grid a
 fromList rows =
@@ -93,6 +93,11 @@ safeAccess i arr
 
 indexOf :: (Ix i, Eq a) => a -> Array i a -> i
 indexOf x = fst . head . filter ((== x) . snd) . Array.assocs
+
+mapWithIndex :: Ix i => (i -> a -> b) -> Array i a -> Array i b
+mapWithIndex f arr =
+  let assocs = map (\(i, x) -> (i, f i x)) (Array.assocs arr) in
+  Array.array (Array.bounds arr) assocs
 
 modifiedCopy :: Ix i => i -> a -> Array i a -> Array i a
 modifiedCopy i x arr = runST $ do
