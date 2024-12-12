@@ -11,6 +11,11 @@ import Data.Array.ST (freeze, thaw, readArray, writeArray, getBounds, STArray)
 import qualified Data.Array as Array
 import Data.Array.Storable (modifyArray')
 
+applyN :: Int -> (a -> a) -> a -> a
+applyN n f x
+  | n == 0 = x
+  | otherwise = f (applyN (n - 1) f x) 
+
 require :: (a -> Bool) -> Maybe a -> Maybe a
 require p = \case
   Nothing -> Nothing
