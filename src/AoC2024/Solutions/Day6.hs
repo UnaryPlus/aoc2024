@@ -8,7 +8,7 @@ import qualified Data.Set as Set
 import Data.Array.ST (STArray, readArray, writeArray, newArray, freeze)
 import Data.Array (range, (!))
 import qualified Data.Array as Array
-import AoC2024.Utils (add2, Grid, fromList, indexOf, safeAccess, count, modifiedCopy)
+import AoC2024.Utils (add2, Grid, fromList, indexOf, (!?), count, modifiedCopy)
 
 type Direction = (Int, Int)
 
@@ -25,7 +25,7 @@ guardLoop grid pos dir history = do
   else do
     writeArray history pos (Set.insert dir prevDirs)
     let pos' = add2 pos dir
-    case safeAccess pos' grid of
+    case grid !? pos' of
       Nothing -> return False
       Just False -> guardLoop grid pos' dir history
       Just True -> guardLoop grid pos (turnRight dir) history

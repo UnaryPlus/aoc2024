@@ -4,6 +4,7 @@ module AoC2024.Solutions.Day7 (parse, part1, part2) where
 
 import Data.List (foldl')
 import Data.Maybe (fromMaybe)
+import AoC2024.Utils (sumMap)
 import AoC2024.Parser (char, execParser, natural, separatedBy, string) 
 
 concatDigits :: Int -> Int -> Int
@@ -20,7 +21,7 @@ parse = map (fromMaybe (error "Parsing failed") . execParser p) . lines
     p = (,) <$> natural <* string ": " <*> separatedBy (char ' ') natural
 
 part1 :: [(Int, [Int])] -> Int
-part1 = sum . map fst . filter (\(result, xs) -> result `elem` results [(+), (*)] xs)
+part1 = sumMap fst . filter (\(result, xs) -> result `elem` results [(+), (*)] xs)
 
 part2 :: [(Int, [Int])] -> Int
-part2 = sum . map fst . filter (\(result, xs) -> result `elem` results [(+), (*), concatDigits] xs) 
+part2 = sumMap fst . filter (\(result, xs) -> result `elem` results [(+), (*), concatDigits] xs) 

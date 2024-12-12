@@ -1,1 +1,73 @@
-module AoC2024.Solutions.Day12 () where
+module AoC2024.Solutions.Day12 (parse, part1, part2) where
+
+import Control.Monad
+import Control.Monad.ST
+import Data.STRef
+import qualified Data.Map as Map
+import Data.Array.ST (STArray, newArray, readArray, writeArray, freeze)
+import Data.Array (range, (!))
+import qualified Data.Array as Array
+import AoC2024.Utils (sumMap, count, Grid, fromList, neighbors, neighborElems', mapWithIndex, (!?))
+
+adjacentFences :: Eq a => Grid a -> Grid Int
+adjacentFences grid = 
+  mapWithIndex (\i c -> count (/= Just c) (neighborElems' grid i)) grid
+
+-- "side end" = top of vertical side or left of horizontal side
+adjacentSideEnds :: Eq a => Grid a -> Grid Int
+adjacentSideEnds grid =
+  mapWithIndex (\(i, j) c -> let
+    up = grid !? (i - 1, j)
+    down = grid !? (i + 1, j)
+    left = grid !? (i, j - 1)
+    right = grid !? (i, j + 1)
+    upLeft = grid !? (i - 1, j - 1)
+    upRight = grid !? (i - 1, j + 1)
+    downLeft = grid !? (i + 1, j - 1)
+    in count id 
+      [ up /= Just c && (left /= Just c || upLeft == Just c)
+      , down /= Just c && (left /= Just c || downLeft == Just c)
+      , left /= Just c && (up /= Just c || upLeft == Just c)
+      , right /= Just c && (up /= Just c || upRight == Just c)
+      ]
+  ) grid
+
+markRegion :: Eq a => Grid a -> STArray s (Int, Int) Int -> Int -> (Int, Int) -> ST s ()
+markRegion grid markers marker i = do
+  explored <- readArray markers i
+  when (explored == (-1)) $ do
+    writeArray markers i marker
+    let adj = filter (\j -> grid ! i == grid ! j) (neighbors grid i)
+    mapM_ (markRegion grid markers marker) adj
+
+markRegions :: Eq a => Grid a -> Grid Int
+markRegions grid = runST $ do
+  markers <- newArray (Array.bounds grid) (-1)
+  counter <- newSTRef 0
+  forM_ (range (Array.bounds grid)) $ \i -> do
+    explored <- readArray markers i
+    when (explored == (-1)) $ do
+      marker <- readSTRef counter
+      markRegion grid markers marker i
+      modifySTRef' counter (+1)
+  freeze markers
+
+getRegions :: Eq a => Grid a -> [[(Int, Int)]]
+getRegions = Map.elems . Map.fromListWith (++) . map (\(i, n) -> (n, [i])) . Array.assocs . markRegions
+
+parse :: String -> Grid Char
+parse = fromList . lines
+
+part1 :: Grid Char -> Int
+part1 grid = let
+  fences = adjacentFences grid
+  regions = getRegions grid
+  cost r = length r * sumMap (fences !) r
+  in sumMap cost regions
+
+part2 :: Grid Char -> Int
+part2 grid = let
+  sideEnds = adjacentSideEnds grid
+  regions = getRegions grid
+  cost r = length r * sumMap (sideEnds !) r
+  in sumMap cost regions

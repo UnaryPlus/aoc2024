@@ -8,7 +8,7 @@ import Data.Bifunctor (first)
 import Control.Monad (zipWithM, unless, forM_)
 import Control.Monad.ST (ST, runST)
 import Data.Array.ST (STArray, readArray, writeArray, newListArray)
-import AoC2024.Utils (require, alternate, modifyAll', indicesWhere, updateMap)
+import AoC2024.Utils (sumMap, require, alternate, modifyAll', indicesWhere, updateMap)
 
 splitBlocksAt :: Int -> [(a, Int)] -> ([(a, Int)], [(a, Int)])
 splitBlocksAt n xs
@@ -96,4 +96,4 @@ part2 (fileSizes, gapSizes) = let
   files = zip3 [0..] fileStarts fileSizes
   gaps = zip gapStarts gapSizes
   files' = findSpaceAll gaps (reverse files)
-  in sum (map checkSumTerm files')
+  in sumMap checkSumTerm files'

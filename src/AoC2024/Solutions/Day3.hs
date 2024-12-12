@@ -6,6 +6,7 @@ import Data.Maybe (fromMaybe, catMaybes)
 import Data.List (foldl')
 import Control.Applicative ((<|>), many)
 import AoC2024.Parser (Parser, execParser, char, anyChar, string, natural)
+import AoC2024.Utils (sumMap)
 
 mulInstruction :: Parser (Int, Int)
 mulInstruction = (,) <$ string "mul(" <*> natural <* char ',' <*> natural <* char ')'
@@ -37,7 +38,7 @@ part1 :: String -> Int
 part1 str = let
   result = execParser (many (Just <$> mulInstruction <|> Nothing <$ anyChar)) str
   pairs = catMaybes (fromMaybe [] result)
-  in sum (map (uncurry (*)) pairs)
+  in sumMap (uncurry (*)) pairs
   
 part2 :: String -> Int
 part2 str = let

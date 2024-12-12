@@ -10,7 +10,7 @@ import Data.Set (Set)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import AoC2024.Parser (execParser, char, natural, separatedBy)
-import AoC2024.Utils (middle)
+import AoC2024.Utils (sumMap, middle)
 
 forbiddenNumbers :: Ord a => [(a, a)] -> Map a (Set a)
 forbiddenNumbers = Map.fromListWith Set.union . map (\(x, y) -> (y, Set.singleton x))
@@ -41,10 +41,10 @@ part1 :: ([(Int, Int)], [[Int]]) -> Int
 part1 (restrictions, updates) = let
   forbidden = forbiddenNumbers restrictions
   obediant = filter (obeys forbidden) updates
-  in sum (map middle obediant)
+  in sumMap middle obediant
 
 part2 :: ([(Int, Int)], [[Int]]) -> Int
 part2 (restrictions, updates) = let
   forbidden = forbiddenNumbers restrictions
   wrong = filter (not . obeys forbidden) updates
-  in sum (map (middle . tsort forbidden) wrong)
+  in sumMap (middle . tsort forbidden) wrong

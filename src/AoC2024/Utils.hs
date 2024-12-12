@@ -2,6 +2,8 @@
 
 module AoC2024.Utils where
 
+import Data.Monoid (Sum(Sum), getSum)
+import Data.Foldable (foldMap')
 import Data.List (foldl')
 import Data.Bifunctor (first)
 import Control.Monad.ST (runST, ST)
@@ -10,6 +12,10 @@ import Data.Array (Array, Ix, range, inRange, (!))
 import Data.Array.ST (freeze, thaw, readArray, writeArray, getBounds, STArray)
 import qualified Data.Array as Array
 import Data.Array.Storable (modifyArray')
+
+-- More useful than sum
+sumMap :: (Foldable t, Num b) => (a -> b) -> t a -> b
+sumMap f = getSum . foldMap' (Sum . f)
 
 applyN :: Int -> (a -> a) -> a -> a
 applyN n f x
@@ -91,8 +97,22 @@ fromList rows =
 dims :: Grid a -> (Int, Int)
 dims = add2 (1, 1) . snd . Array.bounds
 
-safeAccess :: Ix i => i -> Array i a -> Maybe a
-safeAccess i arr
+neighbors :: Grid a -> (Int, Int) -> [(Int, Int)]
+neighbors grid i = filter (inRange (Array.bounds grid)) (neighbors' i)
+  
+neighborElems :: Grid a -> (Int, Int) -> [a]
+neighborElems grid i = map (grid !) (neighbors grid i) 
+
+-- Up, down, left, right
+neighbors' :: (Int, Int) -> [(Int, Int)]
+neighbors' (i, j) = [ (i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1) ]
+
+neighborElems' :: Grid a -> (Int, Int) -> [Maybe a]
+neighborElems' grid i = map (grid !?) (neighbors' i)
+
+infixl 9 !?
+(!?) :: Ix i => Array i a -> i -> Maybe a
+(!?) arr i
   | inRange (Array.bounds arr) i = Just (arr ! i)
   | otherwise = Nothing
 
