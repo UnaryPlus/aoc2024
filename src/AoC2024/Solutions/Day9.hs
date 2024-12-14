@@ -1,5 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-
 module AoC2024.Solutions.Day9 (parse, part1, part2) where
 
 import Data.Char (digitToInt, isDigit)

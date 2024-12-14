@@ -1,15 +1,13 @@
 {-# LANGUAGE LambdaCase #-}
-
 module AoC2024.Solutions.Day5 (parse, part1, part2) where 
 
 import Data.List (partition)
-import Data.Maybe (fromMaybe)
 import Control.Applicative (many)
 import Data.Map (Map)
 import Data.Set (Set)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import AoC2024.Parser (execParser, char, natural, separatedBy)
+import AoC2024.Parser (partialExecParser, char, natural, separatedBy)
 import AoC2024.Utils (sumMap, middle)
 
 forbiddenNumbers :: Ord a => [(a, a)] -> Map a (Set a)
@@ -31,7 +29,7 @@ tsort forbidden xs
     in start ++ tsort forbidden rest
 
 parse :: String -> ([(Int, Int)], [[Int]])
-parse = fromMaybe (error "Parsing failed") . execParser p
+parse = partialExecParser p
   where
     p = (,) <$> many restriction <* char '\n' <*> many update
     restriction = (,) <$> natural <* char '|' <*> natural <* char '\n'

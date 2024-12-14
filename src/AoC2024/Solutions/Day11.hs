@@ -1,5 +1,4 @@
 {-# LANGUAGE TupleSections #-}
-
 module AoC2024.Solutions.Day11 (parse, part1, part2) where
 
 import Data.IntMap.Strict (IntMap)

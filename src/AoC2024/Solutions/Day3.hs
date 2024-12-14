@@ -1,5 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-
 module AoC2024.Solutions.Day3 (parse, part1, part2) where 
 
 import Data.Maybe (fromMaybe, catMaybes)

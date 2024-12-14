@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
-
 module AoC2024.Parser where
 
+import Data.Maybe (fromMaybe)
 import Control.Applicative (Alternative, empty, (<|>), many)
 import Control.Monad (MonadPlus)
 import Data.Bifunctor (first)
@@ -14,6 +14,9 @@ newtype Parser a = Parser { runParser :: String -> Maybe (a, String) }
 
 execParser :: Parser a -> String -> Maybe a
 execParser p s = fmap fst (runParser p s)
+
+partialExecParser :: Parser a -> String -> a
+partialExecParser p s = fromMaybe (error "Parsing failed") (execParser p s)
 
 instance Functor Parser where
   fmap f p = Parser $ \s -> fmap (first f) (runParser p s)
@@ -38,6 +41,11 @@ instance Alternative Parser where
   px <|> py = Parser $ \s -> runParser px s <|> runParser py s
 
 instance MonadPlus Parser where
+
+eof :: Parser ()
+eof = Parser $ \case
+  [] -> Just ((), [])
+  _:_ -> Nothing
 
 char :: Char -> Parser ()
 char c = Parser $ \case

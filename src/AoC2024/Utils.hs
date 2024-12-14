@@ -1,5 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-
 module AoC2024.Utils where
 
 import Data.Monoid (Sum(Sum), getSum)
@@ -12,6 +11,15 @@ import Data.Array (Array, Ix, range, inRange, (!))
 import Data.Array.ST (freeze, thaw, readArray, writeArray, getBounds, STArray)
 import qualified Data.Array as Array
 import Data.Array.Storable (modifyArray')
+
+bezout :: Int -> Int -> (Int, Int, Int) 
+bezout a b = bezout' (a, b) (1, 0) (0, 1)
+  where
+    bezout' (r0, r1) (s0, s1) (t0, t1)
+      | r1 == 0 = (abs r0, s0 * signum r0, t0 * signum r0)
+      | otherwise = 
+        let q = r0 `div` r1 in
+        bezout' (r1, r0 - q * r1) (s1, s0 - q * s1) (t1, t0 - q * t1)
 
 -- More useful than sum
 sumMap :: (Foldable t, Num b) => (a -> b) -> t a -> b

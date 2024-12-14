@@ -1,5 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-
 module AoC2024.Solutions.Day6 (parse, part1, part2) where
 
 import Control.Monad.ST (ST, runST)
