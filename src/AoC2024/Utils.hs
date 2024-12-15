@@ -143,8 +143,11 @@ infixl 9 !?
   | inRange (Array.bounds arr) i = Just (arr ! i)
   | otherwise = Nothing
 
+indicesOf :: (Ix i, Eq a) => a -> Array i a -> [i]
+indicesOf x = map fst . filter ((== x) . snd) . Array.assocs
+
 indexOf :: (Ix i, Eq a) => a -> Array i a -> i
-indexOf x = fst . head . filter ((== x) . snd) . Array.assocs
+indexOf x = head . indicesOf x
 
 mapWithIndex :: Ix i => (i -> a -> b) -> Array i a -> Array i b
 mapWithIndex f arr =

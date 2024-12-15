@@ -9,7 +9,7 @@ import Control.Monad (foldM, forM_)
 import Control.Monad.ST (ST, runST)
 import Data.Array.ST (STArray, freeze, thaw, readArray, writeArray)
 import qualified Data.Array as Array
-import AoC2024.Utils (add2, Grid, fromList, dims, indexOf, spanM, sumMap)
+import AoC2024.Utils (add2, Grid, fromList, dims, indexOf, indicesOf, spanM, sumMap)
 
 type Direction = (Int, Int)
 
@@ -126,11 +126,11 @@ parse str = let
 part1 :: (BoardState (), [Direction]) -> Int
 part1 (board, dirs) = let
   (board', _) = stepAll dirs board
-  boxes = map fst (filter ((== Box ()) . snd) (Array.assocs board')) -- TODO: use indicesWhere
+  boxes = indicesOf (Box ()) board'
   in sumMap (\(i, j) -> 100 * i + j) boxes
 
 part2 :: (BoardState (), [Direction]) -> Int
 part2 (board, dirs) = let
   (board', _) = stepAll dirs (enlarge board)
-  boxes = map fst (filter ((== Box False) . snd) (Array.assocs board')) -- TODO: use indicesWhere
+  boxes = indicesOf (Box False) board'
   in sumMap (\(i, j) -> 100 * i + j) boxes
