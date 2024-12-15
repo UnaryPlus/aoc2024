@@ -67,6 +67,11 @@ alternate = \case
   [x] -> ([x], [])
   x:y:zs -> let (xs, ys) = alternate zs in (x:xs, y:ys)
 
+chunksOf :: Int -> [a] -> [[a]]
+chunksOf n xs
+  | null xs = []
+  | otherwise = take n xs : chunksOf n (drop n xs)
+
 count :: Foldable t => (a -> Bool) -> t a -> Int
 count p = foldl' (\n x -> if p x then n + 1 else n) 0 
 
@@ -75,6 +80,12 @@ differences = \case
   [] -> []
   [_] -> []
   x:xs@(y:_) -> (y - x) : differences xs
+
+argMin :: Ord a => [a] -> Int
+argMin = fst . foldl1 (\(i, x) (j, y) -> if x <= y then (i, x) else (j, y)) . zip [0..]
+
+argMax :: Ord a => [a] -> Int
+argMax = fst . foldl1 (\(i, x) (j, y) -> if x >= y then (i, x) else (j, y)) . zip [0..]
 
 infixr 3 &&&
 (&&&) :: (a -> Bool) -> (a -> Bool) -> a -> Bool
@@ -101,6 +112,9 @@ fromList :: [[a]] -> Grid a
 fromList rows =
   let (m, n) = (length rows, length (head rows)) in
   Array.listArray ((0, 0), (m - 1, n - 1)) (concat rows)
+
+toList :: Grid a -> [[a]]
+toList grid = chunksOf (snd (dims grid)) (Array.elems grid)
 
 dims :: Grid a -> (Int, Int)
 dims = add2 (1, 1) . snd . Array.bounds

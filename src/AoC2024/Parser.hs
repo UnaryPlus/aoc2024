@@ -65,5 +65,11 @@ natural = Parser $ \s ->
   let (n, s') = span isDigit s in
   if null n then Nothing else Just (read n, s')
 
+integer :: Parser Int
+integer = do
+  minus <- (char '-' >> return True) <|> return False
+  n <- natural
+  return (if minus then -n else n)
+
 separatedBy :: Parser () -> Parser a -> Parser [a]
 separatedBy sep p = (:) <$> p <*> many (sep >> p)
