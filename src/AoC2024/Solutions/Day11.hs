@@ -3,7 +3,7 @@ module AoC2024.Solutions.Day11 (parse, part1, part2) where
 
 import Data.IntMap.Strict (IntMap)
 import qualified Data.IntMap.Strict as IntMap
-import AoC2024.Utils (applyN)
+import AoC2024.Utils (nest)
 
 updateStone :: Int -> [Int]
 updateStone x
@@ -23,7 +23,7 @@ parse :: String -> IntMap Int
 parse = IntMap.fromListWith (+) . map ((, 1) . read) . words
 
 part1 :: IntMap Int -> Int
-part1 = sum . applyN 25 blink
+part1 = sum . nest 25 blink
 
 part2 :: IntMap Int -> Int
-part2 = sum . applyN 75 blink
+part2 = sum . nest 75 blink

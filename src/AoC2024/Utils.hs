@@ -25,10 +25,15 @@ bezout a b = bezout' (a, b) (1, 0) (0, 1)
 sumMap :: (Foldable t, Num b) => (a -> b) -> t a -> b
 sumMap f = getSum . foldMap' (Sum . f)
 
-applyN :: Int -> (a -> a) -> a -> a
-applyN n f x
+nest :: Int -> (a -> a) -> a -> a
+nest n f x
   | n == 0 = x
-  | otherwise = f (applyN (n - 1) f x) 
+  | otherwise = f (nest (n - 1) f x) 
+
+nestM :: Monad m => Int -> (a -> m a) -> a -> m a
+nestM n f x 
+  | n == 0 = f x
+  | otherwise = f =<< nestM (n - 1) f x
 
 require :: (a -> Bool) -> Maybe a -> Maybe a
 require p = \case
