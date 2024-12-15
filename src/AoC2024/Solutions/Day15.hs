@@ -3,14 +3,13 @@
 {-# LANGUAGE DeriveFunctor #-}
 module AoC2024.Solutions.Day15 (parse, part1, part2) where
 
-import Data.List
-import Data.Bifunctor
-import Control.Monad
-import Control.Monad.ST
-import Data.Ix
+import Data.List (nub)
+import Data.Bifunctor (second)
+import Control.Monad (foldM, forM_)
+import Control.Monad.ST (ST, runST)
+import Data.Array.ST (STArray, freeze, thaw, readArray, writeArray)
 import qualified Data.Array as Array
-import Data.Array.ST
-import AoC2024.Utils
+import AoC2024.Utils (add2, Grid, fromList, dims, indexOf, spanM, sumMap)
 
 type Direction = (Int, Int)
 
@@ -63,6 +62,8 @@ instance Step () where
       Wall -> return pos
       Box () -> undefined
 
+-- These four functions do not modify board
+-- They only use ST (and STArray) because they are used within the step instance for part 2
 boxIndices :: STArray s (Int, Int) (CellState Bool) -> Direction -> (Int, Int) -> ST s (Maybe [(Int, Int)])
 boxIndices board dir pos = do
   let pos' = add2 dir pos
