@@ -1,13 +1,12 @@
-{-# LANGUAGE LambdaCase #-}
 module AoC2024.Solutions.Day6 (parse, part1, part2) where
 
 import Control.Monad.ST (ST, runST)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Data.Ix (range)
 import Data.Array.ST (STArray, readArray, writeArray, newArray, freeze)
-import Data.Array (range, (!))
 import qualified Data.Array as Array
-import AoC2024.Utils (add2, Grid, fromList, indexOf, (!?), count, modifiedCopy)
+import AoC2024.Utils (add2, Grid, fromList, indexOf, (!), (!?), count, modifiedCopy)
 
 type Direction = (Int, Int)
 

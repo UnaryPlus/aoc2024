@@ -9,7 +9,7 @@ import Control.Monad (foldM, forM_)
 import Control.Monad.ST (ST, runST)
 import Data.Array.ST (STArray, freeze, thaw, readArray, writeArray)
 import qualified Data.Array as Array
-import AoC2024.Utils (add2, Grid, fromList, dims, indexOf, indicesOf, spanM, sumMap)
+import AoC2024.Utils (add2, Grid, fromList, dims, assocs, indexOf, indicesOf, spanM, sumMap)
 
 type Direction = (Int, Int)
 
@@ -107,8 +107,7 @@ instance Step Bool where
 enlarge :: BoardState () -> BoardState Bool
 enlarge (board, pos) = let
   (m, n) = dims board
-  assocs = Array.assocs board
-  assocs' = flip concatMap assocs $ \((i, j), cell) ->
+  assocs' = flip concatMap (assocs board) $ \((i, j), cell) ->
     [ ((i, 2*j), False <$ cell), ((i, 2*j+1), True <$ cell) ]
   board' = Array.array ((0, 0), (m-1, 2*n-1)) assocs'
   pos' = second (*2) pos

@@ -5,9 +5,9 @@ import Control.Monad.ST
 import Data.STRef
 import qualified Data.Map as Map
 import Data.Array.ST (STArray, newArray, readArray, writeArray, freeze)
-import Data.Array (range, (!))
+import Data.Ix (range)
 import qualified Data.Array as Array
-import AoC2024.Utils (sumMap, count, Grid, fromList, neighbors, neighborElems', mapWithIndex, (!?))
+import AoC2024.Utils (sumMap, count, Grid, fromList, neighbors, neighborElems', mapWithIndex, assocs, (!), (!?))
 
 adjacentFences :: Eq a => Grid a -> Grid Int
 adjacentFences grid = 
@@ -53,7 +53,7 @@ markRegions grid = runST $ do
   freeze markers
 
 getRegions :: Eq a => Grid a -> [[(Int, Int)]]
-getRegions = Map.elems . Map.fromListWith (++) . map (\(i, n) -> (n, [i])) . Array.assocs . markRegions
+getRegions = Map.elems . Map.fromListWith (++) . map (\(i, n) -> (n, [i])) . assocs . markRegions
 
 parse :: String -> Grid Char
 parse = fromList . lines

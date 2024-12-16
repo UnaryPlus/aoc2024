@@ -7,7 +7,7 @@ import Data.Bifunctor (first)
 import Control.Monad (zipWithM, unless, forM_)
 import Control.Monad.ST (ST, runST)
 import Data.Array.ST (STArray, readArray, writeArray, newListArray)
-import AoC2024.Utils (sumMap, require, alternate, modifyAll', indicesWhere, updateMap)
+import AoC2024.Utils (sumMap, require, alternate, modifyAll', indicesWhereM, updateMap)
 
 splitBlocksAt :: Int -> [(a, Int)] -> ([(a, Int)], [(a, Int)])
 splitBlocksAt n xs
@@ -61,7 +61,7 @@ findSpace indices gaps n file@(fileID, _, fileSize) = do
     Just i -> do
       (gapStart, gapSize) <- readArray gaps i
       writeArray gaps i (gapStart + fileSize, gapSize - fileSize)
-      needUpdating <- indicesWhere (\fs j -> fs > gapSize - fileSize && j == Just i) indices
+      needUpdating <- indicesWhereM (\fs j -> fs > gapSize - fileSize && j == Just i) indices
       unless (null needUpdating) $ do
         indices' <- getIndices (fmap snd . readArray gaps) (i + 1, n - 1) (minimum needUpdating, maximum needUpdating)
         let updates = zip needUpdating indices'

@@ -1,8 +1,7 @@
 module AoC2024.Solutions.Day4 (parse, part1, part2) where 
 
-import Data.Array ((!))
 import qualified Data.Array as Array
-import AoC2024.Utils (count, (|||), add2, Grid, fromList, dims)
+import AoC2024.Utils ((!), count, (|||), add2, Grid, fromList, dims)
 
 applyMask :: Functor f => (Int, Int) -> f (Int, Int) -> Grid a -> f a
 applyMask base mask grid = fmap (\ix -> grid ! add2 base ix) mask

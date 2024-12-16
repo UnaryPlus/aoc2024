@@ -1,16 +1,86 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE InstanceSigs #-}
 module AoC2024.Utils where
 
 import Data.Monoid (Sum(Sum), getSum)
 import Data.Foldable (foldMap')
-import Data.List (foldl')
+import Data.List (foldl', minimumBy, maximumBy)
+import Data.Function (on)
 import Data.Bifunctor (first)
 import Control.Monad.ST (runST, ST)
 import Control.Monad (forM_, filterM)
-import Data.Array (Array, Ix, range, inRange, (!))
-import Data.Array.ST (freeze, thaw, readArray, writeArray, getBounds, STArray)
+import Data.Ix (Ix, range, inRange)
+import Data.Array.ST (freeze, thaw, readArray, writeArray, modifyArray', getBounds, STArray)
+import Data.Array (Array)
 import qualified Data.Array as Array
-import Data.Array.Storable (modifyArray')
+import Data.Map (Map)
+import qualified Data.Map as Map
+
+class Indexed t i | t -> i where
+  infixl 9 !, !?
+  (!) :: t a -> i -> a
+  (!?) :: t a -> i -> Maybe a
+  assocs :: t a -> [(i, a)]
+  mapWithIndex :: (i -> a -> b) -> t a -> t b
+
+instance Indexed [] Int where
+  (!) :: [a] -> Int -> a
+  (!) = (!!)
+
+  (!?) :: [a] -> Int -> Maybe a
+  (!?) = \cases
+    _ n | n < 0 -> Nothing
+    [] _ -> Nothing
+    (x:xs) n 
+      | n == 0 -> Just x
+      | otherwise -> xs !? (n - 1) 
+  
+  assocs :: [a] -> [(Int, a)]
+  assocs = zip [0..]
+
+  mapWithIndex :: (Int -> a -> b) -> [a] -> [b]
+  mapWithIndex f = map (uncurry f) . assocs
+
+instance Ix i => Indexed (Array i) i where
+  (!) :: Ix i => Array i a -> i -> a
+  (!) = (Array.!)
+
+  (!?) :: Ix i => Array i a -> i -> Maybe a
+  (!?) arr i
+    | inRange (Array.bounds arr) i = Just (arr ! i)
+    | otherwise = Nothing
+
+  assocs :: Ix i => Array i a -> [(i, a)]
+  assocs = Array.assocs
+
+  mapWithIndex :: Ix i => (i -> a -> b) -> Array i a -> Array i b
+  mapWithIndex f arr =
+    let assocs' = map (\(i, x) -> (i, f i x)) (assocs arr) in
+    Array.array (Array.bounds arr) assocs'
+
+instance Ord k => Indexed (Map k) k where
+  (!) :: Ord k => Map k a -> k -> a
+  (!) = (Map.!)  
+
+  (!?) :: Ord k => Map k a -> k -> Maybe a
+  (!?) = (Map.!?)
+
+  assocs :: Ord k => Map k a -> [(k, a)]
+  assocs = Map.toList
+  
+  mapWithIndex :: Ord k => (k -> a -> b) -> Map k a -> Map k b
+  mapWithIndex = Map.mapWithKey
+
+indicesWhere :: Indexed t i => (a -> Bool) -> t a -> [i]
+indicesWhere p = map fst . filter (p . snd) . assocs
+
+indicesOf :: (Indexed t i, Eq a) => a -> t a -> [i]
+indicesOf x = indicesWhere (== x)
+
+indexOf :: (Indexed t i, Eq a) => a -> t a -> i
+indexOf x = head . indicesOf x
 
 bezout :: Int -> Int -> (Int, Int, Int) 
 bezout a b = bezout' (a, b) (1, 0) (0, 1)
@@ -92,6 +162,12 @@ argMin = fst . foldl1 (\(i, x) (j, y) -> if x <= y then (i, x) else (j, y)) . zi
 argMax :: Ord a => [a] -> Int
 argMax = fst . foldl1 (\(i, x) (j, y) -> if x >= y then (i, x) else (j, y)) . zip [0..]
 
+minimumOn :: Ord b => (a -> b) -> [a] -> a
+minimumOn f = minimumBy (compare `on` f)
+
+maximumOn :: Ord b => (a -> b) -> [a] -> a
+maximumOn f = maximumBy (compare `on` f)
+
 infixr 3 &&&
 (&&&) :: (a -> Bool) -> (a -> Bool) -> a -> Bool
 (&&&) p q x = p x && q x
@@ -137,23 +213,6 @@ neighbors' (i, j) = [ (i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1) ]
 neighborElems' :: Grid a -> (Int, Int) -> [Maybe a]
 neighborElems' grid i = map (grid !?) (neighbors' i)
 
-infixl 9 !?
-(!?) :: Ix i => Array i a -> i -> Maybe a
-(!?) arr i
-  | inRange (Array.bounds arr) i = Just (arr ! i)
-  | otherwise = Nothing
-
-indicesOf :: (Ix i, Eq a) => a -> Array i a -> [i]
-indicesOf x = map fst . filter ((== x) . snd) . Array.assocs
-
-indexOf :: (Ix i, Eq a) => a -> Array i a -> i
-indexOf x = head . indicesOf x
-
-mapWithIndex :: Ix i => (i -> a -> b) -> Array i a -> Array i b
-mapWithIndex f arr =
-  let assocs = map (\(i, x) -> (i, f i x)) (Array.assocs arr) in
-  Array.array (Array.bounds arr) assocs
-
 modifiedCopy :: Ix i => i -> a -> Array i a -> Array i a
 modifiedCopy i x arr = runST $ do
   mut <- (thaw :: Ix i => Array i a -> ST s (STArray s i a)) arr
@@ -165,7 +224,36 @@ modifyAll' f arr = do
   ixs <- range <$> getBounds arr
   forM_ ixs $ \i -> modifyArray' arr i f
 
-indicesWhere :: Ix i => (i -> a -> Bool) -> STArray s i a -> ST s [i]
-indicesWhere p arr = do
+indicesWhereM :: Ix i => (i -> a -> Bool) -> STArray s i a -> ST s [i]
+indicesWhereM p arr = do
   ixs <- range <$> getBounds arr
   filterM (\i -> p i <$> readArray arr i) ixs
+
+distances :: (Foldable t, Ord a, Ord d, Num d) => (a -> t (a, d)) -> a -> Map a d
+distances getNeighbors start = fst <$>
+  generalDijkstra (const ()) (\_ _ _ -> ()) (\_ _ -> ()) getNeighbors start
+
+-- Dijkstra's shortest path algorithm
+-- Returns data structure mapping vertex v to (d(v), m(v)) where:
+--     d(v) is the shortest distance from start to v
+--     m(v) is some data concerning the shortest path(s) from start to v
+generalDijkstra :: (Foldable t, Ord a, Ord d, Num d) => (a -> m) -> (a -> a -> m -> m) -> (m -> m -> m) -> (a -> t (a, d)) -> a -> Map a (d, m)
+generalDijkstra startData makeData combineData getNeighbors start =
+  loop Map.empty (Map.singleton start (0, startData start))
+  where
+    merge (dist1, precs1) (dist2, precs2) =
+      case compare dist1 dist2 of
+        LT -> (dist1, precs1)
+        EQ -> (dist1, combineData precs1 precs2)
+        GT -> (dist2, precs2)
+      
+    loop certain uncertain
+      | null uncertain = certain
+      | otherwise = let
+        (node, (dist, precs)) = minimumOn (fst . snd) (Map.toList uncertain)  
+        insert (nbr, d)
+          | Map.member nbr certain = id
+          | otherwise = Map.insertWith merge nbr (dist + d, makeData nbr node precs)
+        certain' = Map.insert node (dist, precs) certain
+        uncertain' = foldr insert (Map.delete node uncertain) (getNeighbors node)
+        in loop certain' uncertain'
