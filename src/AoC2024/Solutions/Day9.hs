@@ -23,10 +23,10 @@ splitBlocks :: [Int] -> [(a, Int)] -> [[(a, Int)]]
 splitBlocks ns xs = updateMap (\acc n -> splitBlocksAt n acc) xs ns
 
 interleave :: [a] -> [[a]] -> [a]
-interleave = curry $ \case
-  (xs, []) -> xs
-  ([], ys) -> concat ys
-  (x:xs, y:ys) -> x : y ++ interleave xs ys
+interleave = \cases
+  xs [] -> xs
+  [] ys -> concat ys
+  (x:xs) (y:ys) -> x : y ++ interleave xs ys
 
 checkSumTerm :: (Int, Int, Int) -> Int
 checkSumTerm (x, i, n) =
