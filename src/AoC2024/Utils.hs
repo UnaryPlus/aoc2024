@@ -200,15 +200,27 @@ toList grid = chunksOf (snd (dims grid)) (Array.elems grid)
 dims :: Grid a -> (Int, Int)
 dims = add2 (1, 1) . snd . Array.bounds
 
+up, down, left, right :: Num a => (a, a)
+up = (-1, 0)
+down = (1, 0)
+left = (0, -1)
+right = (0, 1)
+
+cardinalDirections :: Num a => [(a, a)]
+cardinalDirections = [ up, down, left, right ]
+
+turnLeft, turnRight :: Num a => (a, a) -> (a, a)
+turnLeft (x, y) = (-y, x)
+turnRight (x, y) = (y, -x)
+
 neighbors :: Grid a -> (Int, Int) -> [(Int, Int)]
 neighbors grid i = filter (inRange (Array.bounds grid)) (neighbors' i)
   
 neighborElems :: Grid a -> (Int, Int) -> [a]
 neighborElems grid i = map (grid !) (neighbors grid i) 
 
--- Up, down, left, right
 neighbors' :: (Int, Int) -> [(Int, Int)]
-neighbors' (i, j) = [ (i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1) ]
+neighbors' (i, j) = map (add2 (i, j)) cardinalDirections 
 
 neighborElems' :: Grid a -> (Int, Int) -> [Maybe a]
 neighborElems' grid i = map (grid !?) (neighbors' i)

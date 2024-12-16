@@ -6,15 +6,9 @@ import qualified Data.Set as Set
 import Data.Ix (range)
 import Data.Array.ST (STArray, readArray, writeArray, newArray, freeze)
 import qualified Data.Array as Array
-import AoC2024.Utils (add2, Grid, fromList, indexOf, (!), (!?), count, modifiedCopy)
+import AoC2024.Utils (add2, up, turnRight, Grid, fromList, indexOf, (!), (!?), count, modifiedCopy)
 
 type Direction = (Int, Int)
-
-up :: Direction
-up = (-1, 0)
-
-turnRight :: Direction -> Direction
-turnRight (x, y) = (y, -x)
 
 guardLoop :: Grid Bool -> (Int, Int) -> Direction -> STArray s (Int, Int) (Set Direction) -> ST s Bool
 guardLoop grid pos dir history = do
@@ -49,7 +43,6 @@ parse str = let
 part1 :: (Grid Bool, (Int, Int)) -> Int
 part1 (grid, start) = count id (squaresVisited grid start)
 
--- Takes very long to run in GHCi, but not in test suite (???)
 part2 :: (Grid Bool, (Int, Int)) -> Int
 part2 (grid, start) = let 
   visited = squaresVisited grid start

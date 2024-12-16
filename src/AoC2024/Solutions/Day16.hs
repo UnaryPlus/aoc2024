@@ -1,24 +1,9 @@
 module AoC2024.Solutions.Day16 (parse, part1, part2) where
 
 import qualified Data.Set as Set
-import AoC2024.Utils (add2, minimumOn, Grid, fromList, (!), indexOf, distances, generalDijkstra)
+import AoC2024.Utils (add2, right, cardinalDirections, turnLeft, turnRight, minimumOn, Grid, fromList, (!), indexOf, distances, generalDijkstra)
 
-type Direction = (Int, Int)
-
-up, down, left, right :: Direction
-up = (-1, 0)
-down = (1, 0)
-left = (0, -1)
-right = (0, 1)
-
-cardinalDirections :: [Direction]
-cardinalDirections = [ up, down, left, right ]
-
-turnLeft, turnRight :: Direction -> Direction
-turnLeft (x, y) = (-y, x)
-turnRight (x, y) = (y, -x)
-
-type Node = ((Int, Int), Direction)
+type Node = ((Int, Int), (Int, Int))
 
 getNeighbors :: Grid Bool -> Node -> [(Node, Int)]
 getNeighbors maze (pos, dir) = let
