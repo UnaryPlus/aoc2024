@@ -4,17 +4,17 @@ import Control.Monad
 import Control.Monad.ST
 import Data.STRef
 import qualified Data.Map as Map
-import Data.Array.ST (STArray, newArray, readArray, writeArray, freeze)
+import Data.Array.ST (newArray, readArray, writeArray, freeze)
 import Data.Ix (range)
 import qualified Data.Array as Array
-import AoC2024.Utils (sumMap, count, Grid, fromList, neighbors, neighborElems', mapWithIndex, assocs, (!), (!?))
+import AoC2024.Utils (sumMap, count, Array2, STArray2, fromList, neighbors, neighborElems', mapWithIndex, assocs, (!), (!?))
 
-adjacentFences :: Eq a => Grid a -> Grid Int
+adjacentFences :: Eq a => Array2 a -> Array2 Int
 adjacentFences grid = 
   mapWithIndex (\i c -> count (/= Just c) (neighborElems' grid i)) grid
 
 -- "side end" = top of vertical side or left of horizontal side
-adjacentSideEnds :: Eq a => Grid a -> Grid Int
+adjacentSideEnds :: Eq a => Array2 a -> Array2 Int
 adjacentSideEnds grid =
   mapWithIndex (\(i, j) c -> let
     up = grid !? (i - 1, j)
@@ -32,7 +32,7 @@ adjacentSideEnds grid =
       ]
   ) grid
 
-markRegion :: Eq a => Grid a -> STArray s (Int, Int) Int -> Int -> (Int, Int) -> ST s ()
+markRegion :: Eq a => Array2 a -> STArray2 s Int -> Int -> (Int, Int) -> ST s ()
 markRegion grid markers marker i = do
   explored <- readArray markers i
   when (explored == (-1)) $ do
@@ -40,7 +40,7 @@ markRegion grid markers marker i = do
     let adj = filter (\j -> grid ! i == grid ! j) (neighbors grid i)
     mapM_ (markRegion grid markers marker) adj
 
-markRegions :: Eq a => Grid a -> Grid Int
+markRegions :: Eq a => Array2 a -> Array2 Int
 markRegions grid = runST $ do
   markers <- newArray (Array.bounds grid) (-1)
   counter <- newSTRef 0
@@ -52,20 +52,20 @@ markRegions grid = runST $ do
       modifySTRef' counter (+1)
   freeze markers
 
-getRegions :: Eq a => Grid a -> [[(Int, Int)]]
+getRegions :: Eq a => Array2 a -> [[(Int, Int)]]
 getRegions = Map.elems . Map.fromListWith (++) . map (\(i, n) -> (n, [i])) . assocs . markRegions
 
-parse :: String -> Grid Char
+parse :: String -> Array2 Char
 parse = fromList . lines
 
-part1 :: Grid Char -> Int
+part1 :: Array2 Char -> Int
 part1 grid = let
   fences = adjacentFences grid
   regions = getRegions grid
   cost r = length r * sumMap (fences !) r
   in sumMap cost regions
 
-part2 :: Grid Char -> Int
+part2 :: Array2 Char -> Int
 part2 grid = let
   sideEnds = adjacentSideEnds grid
   regions = getRegions grid

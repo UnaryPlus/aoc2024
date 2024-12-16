@@ -7,9 +7,9 @@ import Data.List (nub)
 import Data.Bifunctor (second)
 import Control.Monad (foldM, forM_)
 import Control.Monad.ST (ST, runST)
-import Data.Array.ST (STArray, freeze, thaw, readArray, writeArray)
+import Data.Array.ST (freeze, thaw, readArray, writeArray)
 import qualified Data.Array as Array
-import AoC2024.Utils (add2, Grid, fromList, dims, assocs, indexOf, indicesOf, spanM, sumMap)
+import AoC2024.Utils (add2, Array2, STArray2, fromList, dims, assocs, indexOf, indicesOf, spanM, sumMap)
 
 type Direction = (Int, Int)
 
@@ -27,7 +27,7 @@ data CellState a
   | Box a
   deriving (Eq, Functor)
 
-type BoardState a = (Grid (CellState a), (Int, Int))
+type BoardState a = (Array2 (CellState a), (Int, Int))
 
 parseCellState :: Char -> CellState ()
 parseCellState = \case
@@ -38,7 +38,7 @@ parseCellState = \case
   _ -> undefined
 
 class Step a where
-  step :: STArray s (Int, Int) (CellState a) -> (Int, Int) -> Direction -> ST s (Int, Int)
+  step :: STArray2 s (CellState a) -> (Int, Int) -> Direction -> ST s (Int, Int)
 
 stepAll :: Step a => [Direction] -> BoardState a -> BoardState a
 stepAll dirs (board, pos) = runST $ do
@@ -64,7 +64,7 @@ instance Step () where
 
 -- These four functions do not modify board
 -- They only use ST (and STArray) because they are used within the step instance for part 2
-boxIndices :: STArray s (Int, Int) (CellState Bool) -> Direction -> (Int, Int) -> ST s (Maybe [(Int, Int)])
+boxIndices :: STArray2 s (CellState Bool) -> Direction -> (Int, Int) -> ST s (Maybe [(Int, Int)])
 boxIndices board dir pos = do
   let pos' = add2 dir pos
   cell <- readArray board pos'
@@ -76,19 +76,19 @@ boxIndices board dir pos = do
       | isRight -> Just [add2 (0, -1) pos', pos'] 
       | otherwise -> Just [pos', add2 (0, 1) pos']
 
-nextLayer :: STArray s (Int, Int) (CellState Bool) -> Direction -> [(Int, Int)] -> ST s (Maybe [(Int, Int)])
+nextLayer :: STArray2 s (CellState Bool) -> Direction -> [(Int, Int)] -> ST s (Maybe [(Int, Int)])
 nextLayer board dir layer = do
   results <- mapM (boxIndices board dir) layer
   return (nub . concat <$> sequence results)
 
-allLayers :: STArray s (Int, Int) (CellState Bool) -> Direction -> [(Int, Int)] -> [(Int, Int)] -> ST s (Maybe [(Int, Int)])
+allLayers :: STArray2 s (CellState Bool) -> Direction -> [(Int, Int)] -> [(Int, Int)] -> ST s (Maybe [(Int, Int)])
 allLayers board dir prev layer
   | null layer = return (Just prev)
   | otherwise = do
     layer' <- nextLayer board dir layer
     maybe (return Nothing) (allLayers board dir (layer ++ prev)) layer'
 
-allBoxIndices :: STArray s (Int, Int) (CellState Bool) -> Direction -> (Int, Int) -> ST s (Maybe [(Int, Int)])
+allBoxIndices :: STArray2 s (CellState Bool) -> Direction -> (Int, Int) -> ST s (Maybe [(Int, Int)])
 allBoxIndices board dir pos = do
   layer1 <- boxIndices board dir pos 
   maybe (return Nothing) (allLayers board dir []) layer1

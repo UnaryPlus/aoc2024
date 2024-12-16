@@ -187,17 +187,18 @@ middle xs = xs !! (length xs `div` 2)
 add2 :: Num a => (a, a) -> (a, a) -> (a, a)
 add2 (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
 
-type Grid = Array (Int, Int)
+type Array2 = Array (Int, Int)
+type STArray2 s = STArray s (Int, Int)
 
-fromList :: [[a]] -> Grid a
+fromList :: [[a]] -> Array2 a
 fromList rows =
   let (m, n) = (length rows, length (head rows)) in
   Array.listArray ((0, 0), (m - 1, n - 1)) (concat rows)
 
-toList :: Grid a -> [[a]]
+toList :: Array2 a -> [[a]]
 toList grid = chunksOf (snd (dims grid)) (Array.elems grid)
 
-dims :: Grid a -> (Int, Int)
+dims :: Array2 a -> (Int, Int)
 dims = add2 (1, 1) . snd . Array.bounds
 
 up, down, left, right :: Num a => (a, a)
@@ -213,16 +214,16 @@ turnLeft, turnRight :: Num a => (a, a) -> (a, a)
 turnLeft (x, y) = (-y, x)
 turnRight (x, y) = (y, -x)
 
-neighbors :: Grid a -> (Int, Int) -> [(Int, Int)]
+neighbors :: Array2 a -> (Int, Int) -> [(Int, Int)]
 neighbors grid i = filter (inRange (Array.bounds grid)) (neighbors' i)
   
-neighborElems :: Grid a -> (Int, Int) -> [a]
+neighborElems :: Array2 a -> (Int, Int) -> [a]
 neighborElems grid i = map (grid !) (neighbors grid i) 
 
 neighbors' :: (Int, Int) -> [(Int, Int)]
 neighbors' (i, j) = map (add2 (i, j)) cardinalDirections 
 
-neighborElems' :: Grid a -> (Int, Int) -> [Maybe a]
+neighborElems' :: Array2 a -> (Int, Int) -> [Maybe a]
 neighborElems' grid i = map (grid !?) (neighbors' i)
 
 modifiedCopy :: Ix i => i -> a -> Array i a -> Array i a
