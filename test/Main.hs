@@ -1,7 +1,6 @@
 module Main (main) where
 
 import System.Exit (exitFailure)
-import Text.Printf (printf)
 import Control.Monad (when)
 
 import qualified AoC2024.Solutions.Day1 as Day1
@@ -20,7 +19,7 @@ import qualified AoC2024.Solutions.Day13 as Day13
 import qualified AoC2024.Solutions.Day14 as Day14
 import qualified AoC2024.Solutions.Day15 as Day15
 import qualified AoC2024.Solutions.Day16 as Day16
--- import qualified AoC2024.Solutions.Day17 as Day17
+import qualified AoC2024.Solutions.Day17 as Day17
 -- import qualified AoC2024.Solutions.Day18 as Day18
 -- import qualified AoC2024.Solutions.Day19 as Day19
 -- import qualified AoC2024.Solutions.Day20 as Day20
@@ -30,16 +29,16 @@ import qualified AoC2024.Solutions.Day16 as Day16
 -- import qualified AoC2024.Solutions.Day24 as Day24
 -- import qualified AoC2024.Solutions.Day25 as Day25
 
-testDay :: Int -> (String -> a) -> (a -> Int) -> (a -> Int) -> FilePath -> Int -> Int -> IO ()
+testDay :: (Eq b, Eq c, Show b, Show c) => Int -> (String -> a) -> (a -> b) -> (a -> c) -> FilePath -> b -> c -> IO ()
 testDay n parse part1 part2 path answer1 answer2 = do
   input <- parse <$> readFile path
   let result1 = part1 input
   when (result1 /= answer1) $ do
-    printf "Day %d, part 1: expected %d, got %d" n answer1 result1
+    putStrLn $ "Day " ++ show n ++ ", part 1: expected " ++ show answer1 ++ ", got " ++ show result1
     exitFailure 
   let result2 = part2 input
   when (result2 /= answer2) $ do
-    printf "Day %d, part 2: expected %d, got %d" n answer2 result2
+    putStrLn $ "Day " ++ show n ++ ", part 2: expected " ++ show answer2 ++ ", got " ++ show result2
     exitFailure
 
 main :: IO ()
@@ -60,4 +59,5 @@ main = do
   testDay 14 Day14.parse Day14.part1 Day14.part2 "input/day14.txt" 230686500 7672
   testDay 15 Day15.parse Day15.part1 Day15.part2 "input/day15.txt" 1360570 1381446
   testDay 16 Day16.parse Day16.part1 Day16.part2 "input/day16.txt" 143564 593
+  testDay 17 Day17.parse Day17.part1 Day17.part2 "input/day17.txt" "3,6,3,7,0,7,0,3,0" (-1)
 

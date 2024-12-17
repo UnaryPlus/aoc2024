@@ -76,6 +76,9 @@ instance Ord k => Indexed (Map k) k where
 indicesWhere :: Indexed t i => (a -> Bool) -> t a -> [i]
 indicesWhere p = map fst . filter (p . snd) . assocs
 
+indexWhere :: Indexed t i => (a -> Bool) -> t a -> i
+indexWhere p = head . indicesWhere p
+
 indicesOf :: (Indexed t i, Eq a) => a -> t a -> [i]
 indicesOf x = indicesWhere (== x)
 
@@ -104,6 +107,18 @@ nestM :: Monad m => Int -> (a -> m a) -> a -> m a
 nestM n f x 
   | n == 0 = f x
   | otherwise = f =<< nestM (n - 1) f x
+
+whileJust :: (a -> Maybe a) -> a -> a
+whileJust f x =
+  case f x of
+    Nothing -> x
+    Just x' -> whileJust f x'
+
+untilLeft :: (a -> Either b a) -> a -> b
+untilLeft f x =
+  case f x of
+    Left y -> y
+    Right x' -> untilLeft f x'
 
 require :: (a -> Bool) -> Maybe a -> Maybe a
 require p = \case
