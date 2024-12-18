@@ -20,7 +20,7 @@ import qualified AoC2024.Solutions.Day14 as Day14
 import qualified AoC2024.Solutions.Day15 as Day15
 import qualified AoC2024.Solutions.Day16 as Day16
 import qualified AoC2024.Solutions.Day17 as Day17
--- import qualified AoC2024.Solutions.Day18 as Day18
+import qualified AoC2024.Solutions.Day18 as Day18
 -- import qualified AoC2024.Solutions.Day19 as Day19
 -- import qualified AoC2024.Solutions.Day20 as Day20
 -- import qualified AoC2024.Solutions.Day21 as Day21
@@ -60,4 +60,5 @@ main = do
   testDay 15 Day15.parse Day15.part1 Day15.part2 "input/day15.txt" 1360570 1381446
   testDay 16 Day16.parse Day16.part1 Day16.part2 "input/day16.txt" 143564 593
   testDay 17 Day17.parse Day17.part1 Day17.part2 "input/day17.txt" "3,6,3,7,0,7,0,3,0" 136904920099226
+  testDay 18 Day18.parse Day18.part1 Day18.part2 "input/day18.txt" 338 (-1)
 
