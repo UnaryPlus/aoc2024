@@ -2,6 +2,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE TupleSections #-}
 module AoC2024.Utils where
 
 import Data.Monoid (Sum(Sum), getSum)
@@ -240,6 +241,12 @@ neighbors' (i, j) = map (add2 (i, j)) cardinalDirections
 
 neighborElems' :: Array2 a -> (Int, Int) -> [Maybe a]
 neighborElems' grid i = map (grid !?) (neighbors' i)
+
+trueArray :: Ix i => (i, i) -> [i] -> Array i Bool
+trueArray bounds trues = Array.accumArray (||) False bounds (map (, True) trues)
+
+falseArray :: Ix i => (i, i) -> [i] -> Array i Bool
+falseArray bounds falses = Array.accumArray (&&) True bounds (map (, False) falses)
 
 modifiedCopy :: Ix i => i -> a -> Array i a -> Array i a
 modifiedCopy i x arr = runST $ do

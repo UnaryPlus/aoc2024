@@ -60,5 +60,5 @@ main = do
   testDay 15 Day15.parse Day15.part1 Day15.part2 "input/day15.txt" 1360570 1381446
   testDay 16 Day16.parse Day16.part1 Day16.part2 "input/day16.txt" 143564 593
   testDay 17 Day17.parse Day17.part1 Day17.part2 "input/day17.txt" "3,6,3,7,0,7,0,3,0" 136904920099226
-  testDay 18 Day18.parse Day18.part1 Day18.part2 "input/day18.txt" 338 (-1)
+  testDay 18 Day18.parse Day18.part1 Day18.part2 "input/day18.txt" 338 "20,44"
 

@@ -1,9 +1,9 @@
 {-# LANGUAGE TupleSections #-}
 module AoC2024.Solutions.Day18 (parse, part1, part2) where
 
-import qualified Data.Array as Array
+import qualified Data.Map as Map
 import AoC2024.Parser (partialExecParser, natural, char)
-import AoC2024.Utils ((!), Array2, neighbors, distances)
+import AoC2024.Utils (Array2, (!), falseArray, modifiedCopy, neighbors, distances)
 
 getNeighbors :: Array2 Bool -> (Int, Int) -> [((Int, Int), Int)]
 getNeighbors maze = map (, 1) . filter (maze !) . neighbors maze
@@ -15,8 +15,15 @@ parse = map (partialExecParser p) . lines
 part1 :: [(Int, Int)] -> Int
 part1 bytes = let
   kilo = take 1024 bytes 
-  maze = Array.accumArray (&&) True ((0, 0), (70, 70)) (map (, False) kilo)
+  maze = falseArray ((0, 0), (70, 70)) kilo
   in distances (getNeighbors maze) (0, 0) ! (70, 70)
 
-part2 :: [(Int, Int)] -> Int
-part2 = undefined
+-- Rather slow
+part2 :: [(Int, Int)] -> String
+part2 bytes = let
+  (kilo, rest) = splitAt 1024 bytes
+  start = falseArray ((0, 0), (70, 70)) kilo
+  mazes = tail (scanl (\maze byte -> modifiedCopy byte False maze) start rest)
+  possible = map (\maze -> Map.member (70, 70) (distances (getNeighbors maze) (0, 0))) mazes
+  badByte = fst (head (dropWhile snd (zip rest possible)))
+  in show (fst badByte) ++ "," ++ show (snd badByte)
