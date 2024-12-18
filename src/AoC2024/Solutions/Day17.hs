@@ -54,7 +54,7 @@ parse = partialExecParser p
 part1 :: (Registers, Array Int Int) -> String
 part1 (regs, instrs) =
   let out = runProgram instrs regs in
-  foldl (\str n -> if null str then show n else show n ++ ',' : str) "" out -- TODO: add a "join" function to Utils?
+  foldl (\str n -> if null str then show n else show n ++ ',' : str) "" out
 
 -- Although part1 (along with parse) is capable of interpreting any program in this assembly language,
 -- part2 is specific to the program in input/day17.txt. This program outputs [f x, f (x >> 3), f (x >> 6), ...],
@@ -63,9 +63,9 @@ part1 (regs, instrs) =
 -- numbers that output [0], then those that output [3, 0], then [5, 3, 0], and so on. If we call these sets of
 -- numbers X1, X2, X3, ..., then every number in X{n+1} must be of the form 8 * m + k, where m is in X{n} and 
 -- 0 <= k <= 7. The answer to part 2 is the minimum number in X16.
-part2 :: a -> Int
-part2 _ = minimum possibilities
+part2 :: (a, Array Int Int) -> Int
+part2 (_, instrs) = minimum possibilities
   where
     f x = (((x .&. 7) .^. 3) .^. (x `shiftR` ((x .&. 7) .^. 5))) .&. 7
     extendToInclude n = concatMap (\x -> filter ((== n) . f) [x*8 .. x*8+7])
-    possibilities = foldr extendToInclude [0] [2,4,1,5,7,5,1,6,0,3,4,6,5,5,3,0]
+    possibilities = foldr extendToInclude [0] (Array.elems instrs)
