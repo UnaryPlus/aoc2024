@@ -1,7 +1,7 @@
 module AoC2024.Solutions.Day16 (parse, part1, part2) where
 
 import qualified Data.Set as Set
-import AoC2024.Utils (add2, right, cardinalDirections, turnLeft, turnRight, minimumOn, Array2, fromList, (!), indexOf, distances, generalDijkstra)
+import AoC2024.Utils (add2, right, cardinalDirections, turnLeft, turnRight, minimumOn, Array2, fromList, (!), indexOf, graphDistances, generalDijkstra)
 
 type Node = ((Int, Int), (Int, Int))
 
@@ -20,7 +20,7 @@ parse str = let
 
 part1 :: (Array2 Bool, (Int, Int), (Int, Int)) -> Int
 part1 (maze, start, end) = let
-  dists = distances (getNeighbors maze) (start, right)
+  dists = graphDistances (getNeighbors maze) (start, right)
   in minimum (map (\dir -> dists ! (end, dir)) cardinalDirections)
 
 part2 :: (Array2 Bool, (Int, Int), (Int, Int)) -> Int

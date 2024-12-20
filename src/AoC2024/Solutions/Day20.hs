@@ -1,6 +1,7 @@
 {-# LANGUAGE TupleSections #-}
 module AoC2024.Solutions.Day20 (parse, part1) where
 
+import Data.Maybe (fromJust)
 import AoC2024.Utils
 
 getNeighbors :: Array2 Bool -> Maybe (Int, Int) -> (Int, Int) -> [((Int, Int), Int)]
@@ -16,7 +17,7 @@ parse str = let
 
 part1 :: (Array2 Bool, (Int, Int), (Int, Int)) -> Int
 part1 (maze, start, end) = let
-  dist = distances (getNeighbors maze Nothing) start ! end
+  dist = fromJust (graphDistance (getNeighbors maze Nothing) start end)
   walls = indicesOf False maze
-  dists = map (\wall -> distances (getNeighbors maze (Just wall)) start ! end) walls
+  dists = map (\wall -> fromJust (graphDistance (getNeighbors maze (Just wall)) start end)) walls
   in count (<= dist - 100) dists

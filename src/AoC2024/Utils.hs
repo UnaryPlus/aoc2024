@@ -270,9 +270,13 @@ indicesWhereM p arr = do
   ixs <- range <$> getBounds arr
   filterM (\i -> p i <$> readArray arr i) ixs
 
-distances :: (Foldable t, Ord a, Ord d, Num d) => (a -> t (a, d)) -> a -> Map a d
-distances getNeighbors start = fst <$>
+graphDistances :: (Foldable t, Ord a, Ord d, Num d) => (a -> t (a, d)) -> a -> Map a d
+graphDistances getNeighbors start = fst <$>
   generalDijkstra (const ()) (\_ _ _ -> ()) (\_ _ -> ()) getNeighbors start
+
+graphDistance :: (Foldable t, Ord a, Ord d, Num d) => (a -> t (a, d)) -> a -> a -> Maybe d
+graphDistance getNeighbors start end = fst <$> 
+  generalDijkstra1 (const ()) (\_ _ _ -> ()) (\_ _ -> ()) getNeighbors start end
 
 -- Dijkstra's shortest path algorithm
 -- Returns data structure mapping vertex v to (d(v), m(v)) where:
@@ -298,3 +302,24 @@ generalDijkstra startData makeData combineData getNeighbors start =
         certain' = Map.insert node (dist, precs) certain
         uncertain' = foldr insert (Map.delete node uncertain) (getNeighbors node)
         in loop certain' uncertain'
+
+generalDijkstra1 :: (Foldable t, Ord a, Ord d, Num d) => (a -> m) -> (a -> a -> m -> m) -> (m -> m -> m) -> (a -> t (a, d)) -> a -> a -> Maybe (d, m)
+generalDijkstra1 startData makeData combineData getNeighbors start end =
+  loop Map.empty (Map.singleton start (0, startData start))
+  where
+    merge (dist1, precs1) (dist2, precs2) =
+      case compare dist1 dist2 of
+        LT -> (dist1, precs1)
+        EQ -> (dist1, combineData precs1 precs2)
+        GT -> (dist2, precs2)
+      
+    loop certain uncertain
+      | null uncertain = Nothing
+      | otherwise = let
+        (node, (dist, precs)) = minimumOn (fst . snd) (Map.toList uncertain)  
+        insert (nbr, d)
+          | Map.member nbr certain = id
+          | otherwise = Map.insertWith merge nbr (dist + d, makeData nbr node precs)
+        certain' = Map.insert node (dist, precs) certain
+        uncertain' = foldr insert (Map.delete node uncertain) (getNeighbors node)
+        in if node == end then Just (dist, precs) else loop certain' uncertain'
