@@ -1,9 +1,9 @@
 module AoC2024.Solutions.Day19 (parse, part1, part2) where
 
-import Data.List
+import Data.List (tails, isPrefixOf)
 import qualified Data.Array as Array
-import AoC2024.Parser 
-import AoC2024.Utils
+import AoC2024.Parser (partialExecParser, parseWhile, char, string, eof, separatedBy, endedBy)
+import AoC2024.Utils ((!), count, sumMap)
 
 numDivisionsInto :: Eq a => [[a]] -> [a] -> Int
 numDivisionsInto towels design = arr ! length design
