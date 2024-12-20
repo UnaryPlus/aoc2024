@@ -18,6 +18,8 @@ import Data.Array (Array)
 import qualified Data.Array as Array
 import Data.Map (Map)
 import qualified Data.Map as Map
+import qualified Data.Set as Set
+import qualified AoC2024.Utils.PSQueue as PSQueue
 
 class Indexed t i | t -> i where
   infixl 9 !, !?
@@ -242,11 +244,30 @@ neighbors grid i = filter (inRange (Array.bounds grid)) (neighbors' i)
 neighborElems :: Array2 a -> (Int, Int) -> [a]
 neighborElems grid i = map (grid !) (neighbors grid i) 
 
+manhattanCircle :: Array2 a -> Int -> (Int, Int) -> [(Int, Int)]
+manhattanCircle grid r i = filter (inRange (Array.bounds grid)) (manhattanCircle' r i)
+
+manhattanBall :: Array2 a -> Int -> (Int, Int) -> [(Int, Int)]
+manhattanBall grid r i = filter (inRange (Array.bounds grid)) (manhattanBall' r i)
+
 neighbors' :: (Int, Int) -> [(Int, Int)]
 neighbors' (i, j) = map (add2 (i, j)) cardinalDirections 
 
 neighborElems' :: Array2 a -> (Int, Int) -> [Maybe a]
 neighborElems' grid i = map (grid !?) (neighbors' i)
+
+manhattanCircle' :: Int -> (Int, Int) -> [(Int, Int)]
+manhattanCircle' r (i, j)
+  | r == 0 = [ (i, j) ]
+  | otherwise = topLeft ++ topRight ++ bottomLeft ++ bottomRight
+  where
+    topLeft = [ (i - r + k, j - k) | k <- [0..r-1] ]
+    topRight = [ (i - r + k, j + k) | k <- [1..r] ]
+    bottomLeft = [ (i + r - k, j - k) | k <- [1..r] ]
+    bottomRight = [ (i + r - k, j + k) | k <- [0..r-1] ]
+
+manhattanBall' :: Int -> (Int, Int) -> [(Int, Int)]
+manhattanBall' r i = concatMap (\r' -> manhattanCircle' r' i) [0..r]
 
 trueArray :: Ix i => (i, i) -> [i] -> Array i Bool
 trueArray bounds trues = Array.accumArray (||) False bounds (map (, True) trues)
@@ -284,42 +305,30 @@ graphDistance getNeighbors start end = fst <$>
 --     m(v) is some data concerning the shortest path(s) from start to v
 generalDijkstra :: (Foldable t, Ord a, Ord d, Num d) => (a -> m) -> (a -> a -> m -> m) -> (m -> m -> m) -> (a -> t (a, d)) -> a -> Map a (d, m)
 generalDijkstra startData makeData combineData getNeighbors start =
-  loop Map.empty (Map.singleton start (0, startData start))
-  where
-    merge (dist1, precs1) (dist2, precs2) =
-      case compare dist1 dist2 of
-        LT -> (dist1, precs1)
-        EQ -> (dist1, combineData precs1 precs2)
-        GT -> (dist2, precs2)
-      
+  loop Map.empty (PSQueue.singleton start 0 (startData start))
+  where    
     loop certain uncertain
-      | null uncertain = certain
+      | PSQueue.null uncertain = certain
       | otherwise = let
-        (node, (dist, precs)) = minimumOn (fst . snd) (Map.toList uncertain)  
+        (node, dist, info) = PSQueue.peek uncertain
         insert (nbr, d)
           | Map.member nbr certain = id
-          | otherwise = Map.insertWith merge nbr (dist + d, makeData nbr node precs)
-        certain' = Map.insert node (dist, precs) certain
-        uncertain' = foldr insert (Map.delete node uncertain) (getNeighbors node)
+          | otherwise = PSQueue.insertWith combineData nbr (dist + d) (makeData nbr node info)
+        certain' = Map.insert node (dist, info) certain
+        uncertain' = foldr insert (PSQueue.delete node uncertain) (getNeighbors node)
         in loop certain' uncertain'
 
 generalDijkstra1 :: (Foldable t, Ord a, Ord d, Num d) => (a -> m) -> (a -> a -> m -> m) -> (m -> m -> m) -> (a -> t (a, d)) -> a -> a -> Maybe (d, m)
 generalDijkstra1 startData makeData combineData getNeighbors start end =
-  loop Map.empty (Map.singleton start (0, startData start))
-  where
-    merge (dist1, precs1) (dist2, precs2) =
-      case compare dist1 dist2 of
-        LT -> (dist1, precs1)
-        EQ -> (dist1, combineData precs1 precs2)
-        GT -> (dist2, precs2)
-      
+  loop Set.empty (PSQueue.singleton start 0 (startData start))
+  where      
     loop certain uncertain
-      | null uncertain = Nothing
+      | PSQueue.null uncertain = Nothing
       | otherwise = let
-        (node, (dist, precs)) = minimumOn (fst . snd) (Map.toList uncertain)  
+        (node, dist, info) = PSQueue.peek uncertain
         insert (nbr, d)
-          | Map.member nbr certain = id
-          | otherwise = Map.insertWith merge nbr (dist + d, makeData nbr node precs)
-        certain' = Map.insert node (dist, precs) certain
-        uncertain' = foldr insert (Map.delete node uncertain) (getNeighbors node)
-        in if node == end then Just (dist, precs) else loop certain' uncertain'
+          | Set.member nbr certain = id
+          | otherwise = PSQueue.insertWith combineData nbr (dist + d) (makeData nbr node info)
+        certain' = Set.insert node certain
+        uncertain' = foldr insert (PSQueue.delete node uncertain) (getNeighbors node)
+        in if node == end then Just (dist, info) else loop certain' uncertain'
