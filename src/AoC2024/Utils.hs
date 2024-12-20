@@ -163,6 +163,12 @@ chunksOf n xs
   | null xs = []
   | otherwise = take n xs : chunksOf n (drop n xs)
 
+dropPrefix :: Eq a => [a] -> [a] -> Maybe [a]
+dropPrefix = \cases
+  [] xs -> Just xs
+  (p:ps) (x:xs) | p == x -> dropPrefix ps xs
+  _ _ -> Nothing
+
 count :: Foldable t => (a -> Bool) -> t a -> Int
 count p = foldl' (\n x -> if p x then n + 1 else n) 0 
 

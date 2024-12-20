@@ -60,6 +60,9 @@ anyChar = Parser $ \case
 string :: String -> Parser ()
 string = mapM_ char
 
+parseWhile :: (Char -> Bool) -> Parser String
+parseWhile p = Parser (Just . span p)
+
 natural :: Parser Int
 natural = Parser $ \s ->
   let (n, s') = span isDigit s in
@@ -73,3 +76,6 @@ integer = do
 
 separatedBy :: Parser () -> Parser a -> Parser [a]
 separatedBy sep p = (:) <$> p <*> many (sep >> p)
+
+endedBy :: Parser () -> Parser a -> Parser [a]
+endedBy sep p = many (p <* sep)
