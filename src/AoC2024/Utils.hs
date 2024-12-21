@@ -174,11 +174,14 @@ dropPrefix = \cases
 count :: Foldable t => (a -> Bool) -> t a -> Int
 count p = foldl' (\n x -> if p x then n + 1 else n) 0 
 
-differences :: Num a => [a] -> [a]
-differences = \case
+mapPairs :: (a -> a -> b) -> [a] -> [b]
+mapPairs f = \case
   [] -> []
   [_] -> []
-  x:xs@(y:_) -> (y - x) : differences xs
+  x:xs@(y:_) -> f x y : mapPairs f xs
+
+differences :: Num a => [a] -> [a]
+differences = mapPairs (flip (-))
 
 argMin :: Ord a => [a] -> Int
 argMin = fst . foldl1 (\(i, x) (j, y) -> if x <= y then (i, x) else (j, y)) . zip [0..]
