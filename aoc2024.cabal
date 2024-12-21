@@ -14,7 +14,8 @@ library
 
   exposed-modules:
     AoC2024.Utils,
-    AoC2024.Utils.PSQueue
+    AoC2024.Utils.PSQueue,
+    AoC2024.Interpolate,
     AoC2024.Parser,
     AoC2024.Solutions.Day1,
     AoC2024.Solutions.Day2,

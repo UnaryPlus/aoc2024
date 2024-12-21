@@ -3,6 +3,7 @@ module Main (main) where
 import System.Exit (exitFailure)
 import Control.Monad (when)
 
+import AoC2024.Interpolate (interpolate)
 import qualified AoC2024.Solutions.Day1 as Day1
 import qualified AoC2024.Solutions.Day2 as Day2
 import qualified AoC2024.Solutions.Day3 as Day3
@@ -31,15 +32,15 @@ import qualified AoC2024.Solutions.Day21 as Day21
 
 testDay :: (Eq b, Eq c, Show b, Show c) => Int -> (String -> a) -> (a -> b) -> (a -> c) -> FilePath -> b -> c -> IO ()
 testDay n parse part1 part2 path answer1 answer2 = do
-  putStrLn $ "Testing day " ++ show n ++ "..."
+  interpolate "Testing day $..." n
   input <- parse <$> readFile path
   let result1 = part1 input
   when (result1 /= answer1) $ do
-    putStrLn $ "Day " ++ show n ++ ", part 1: expected " ++ show answer1 ++ ", got " ++ show result1
+    interpolate "Day $, part 1: expected $, got $" n answer1 result1
     exitFailure 
   let result2 = part2 input
   when (result2 /= answer2) $ do
-    putStrLn $ "Day " ++ show n ++ ", part 2: expected " ++ show answer2 ++ ", got " ++ show result2
+    interpolate "Day $, part 2: expected $, got $" n answer2 result2
     exitFailure
 
 main :: IO ()
