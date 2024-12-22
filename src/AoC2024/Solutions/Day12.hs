@@ -4,10 +4,10 @@ import Control.Monad
 import Control.Monad.ST
 import Data.STRef
 import qualified Data.Map as Map
-import Data.Array.ST (newArray, readArray, writeArray, freeze)
+import Data.Array.ST (newArray, readArray, writeArray)
 import Data.Ix (range)
 import qualified Data.Array as Array
-import AoC2024.Utils (sumMap, count, Array2, STArray2, fromList, neighbors, neighborElems', mapWithIndex, assocs, (!), (!?))
+import AoC2024.Utils (sumMap, count, Array2, STArray2, fromList, neighbors, neighborElems', mapWithIndex, assocs, (!), (!?), freeze)
 
 adjacentFences :: Eq a => Array2 a -> Array2 Int
 adjacentFences grid = 

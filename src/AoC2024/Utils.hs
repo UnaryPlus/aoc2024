@@ -13,7 +13,8 @@ import Data.Bifunctor (first)
 import Control.Monad.ST (runST, ST)
 import Control.Monad (forM_, filterM)
 import Data.Ix (Ix, range, inRange)
-import Data.Array.ST (freeze, thaw, readArray, writeArray, modifyArray', getBounds, STArray)
+import Data.Array.ST (readArray, writeArray, modifyArray', getBounds, STArray)
+import qualified Data.Array.MArray as MArray
 import Data.Array (Array)
 import qualified Data.Array as Array
 import Data.Map (Map)
@@ -278,9 +279,15 @@ trueArray bounds trues = Array.accumArray (||) False bounds (map (, True) trues)
 falseArray :: Ix i => (i, i) -> [i] -> Array i Bool
 falseArray bounds falses = Array.accumArray (&&) True bounds (map (, False) falses)
 
+freeze :: Ix i => STArray s i a -> ST s (Array i a)
+freeze = MArray.freeze
+
+thaw :: Ix i => Array i a -> ST s (STArray s i a)
+thaw = MArray.thaw
+
 modifiedCopy :: Ix i => i -> a -> Array i a -> Array i a
 modifiedCopy i x arr = runST $ do
-  mut <- (thaw :: Ix i => Array i a -> ST s (STArray s i a)) arr
+  mut <- thaw arr
   writeArray mut i x
   freeze mut
 

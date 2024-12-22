@@ -4,9 +4,9 @@ import Control.Monad.ST (ST, runST)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Ix (range)
-import Data.Array.ST (readArray, writeArray, newArray, freeze)
+import Data.Array.ST (readArray, writeArray, newArray)
 import qualified Data.Array as Array
-import AoC2024.Utils (add2, up, turnRight, Array2, STArray2, fromList, indexOf, (!), (!?), count, modifiedCopy)
+import AoC2024.Utils (add2, up, turnRight, Array2, STArray2, fromList, indexOf, (!), (!?), count, modifiedCopy, freeze)
 
 type Direction = (Int, Int)
 

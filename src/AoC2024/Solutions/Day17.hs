@@ -2,7 +2,7 @@
 module AoC2024.Solutions.Day17 (parse, part1, part2) where
 
 import Data.Functor ((<&>))
-import Data.Bits ((.^.), (.&.), shiftR)
+import Data.Bits (xor, (.&.), shiftR)
 import Data.Array (Array)
 import qualified Data.Array as Array
 import AoC2024.Parser (Parser, partialExecParser, char, string, natural, eof, separatedBy)
@@ -15,10 +15,10 @@ step :: Array Int Int -> ProgState -> Maybe ProgState
 step instrs (regs@(regA, regB, regC), i, out) =
   instrs !? i <&> \case 
     0 -> ((regA `shiftR` comboOp, regB, regC), i + 2, out)
-    1 -> ((regA, regB .^. litOp, regC), i + 2, out)
+    1 -> ((regA, regB `xor` litOp, regC), i + 2, out)
     2 -> ((regA, comboOp .&. 7, regC), i + 2, out)
     3 -> (regs, if regA == 0 then i + 2 else litOp, out)
-    4 -> ((regA, regB .^. regC, regC), i + 2, out)
+    4 -> ((regA, regB `xor` regC, regC), i + 2, out)
     5 -> (regs, i + 2, (comboOp .&. 7) : out)
     6 -> ((regA, regA `shiftR` comboOp, regC), i + 2, out)
     7 -> ((regA, regB, regA `shiftR` comboOp), i + 2, out)
@@ -66,6 +66,6 @@ part1 (regs, instrs) =
 part2 :: (a, Array Int Int) -> Int
 part2 (_, instrs) = minimum possibilities
   where
-    f x = (((x .&. 7) .^. 3) .^. (x `shiftR` ((x .&. 7) .^. 5))) .&. 7
+    f x = (((x .&. 7) `xor` 3) `xor` (x `shiftR` ((x .&. 7) `xor` 5))) .&. 7
     extendToInclude n = concatMap (\x -> filter ((== n) . f) [x*8 .. x*8+7])
     possibilities = foldr extendToInclude [0] (Array.elems instrs)

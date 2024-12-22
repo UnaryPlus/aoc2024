@@ -7,9 +7,9 @@ import Data.List (nub)
 import Data.Bifunctor (second)
 import Control.Monad (foldM, forM_)
 import Control.Monad.ST (ST, runST)
-import Data.Array.ST (freeze, thaw, readArray, writeArray)
+import Data.Array.ST (readArray, writeArray)
 import qualified Data.Array as Array
-import AoC2024.Utils (add2, Array2, STArray2, fromList, dims, assocs, indexOf, indicesOf, spanM, sumMap)
+import AoC2024.Utils (add2, Array2, STArray2, fromList, dims, assocs, indexOf, indicesOf, spanM, sumMap, freeze, thaw)
 
 type Direction = (Int, Int)
 
