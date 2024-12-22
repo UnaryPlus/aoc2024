@@ -62,7 +62,7 @@ main = do
   testDay 15 Day15.parse Day15.part1 Day15.part2 "input/day15.txt" 1360570 1381446
   testDay 16 Day16.parse Day16.part1 Day16.part2 "input/day16.txt" 143564 593
   testDay 17 Day17.parse Day17.part1 Day17.part2 "input/day17.txt" "3,6,3,7,0,7,0,3,0" 136904920099226
-  testDay 18 Day18.parse Day18.part1 Day18.part2 "input/day18.txt" 338 "20,44"
+  testDay 18 Day18.parse Day18.part1 Day18.part2 "input/day18.txt" 338 "20,44" -- Rather slow
   testDay 19 Day19.parse Day19.part1 Day19.part2 "input/day19.txt" 336 758890600222015
   testDay 20 Day20.parse Day20.part1 Day20.part2 "input/day20.txt" 1384 1008542      
-  testDay 21 Day21.parse Day21.part1 (const ()) "input/day21.txt" 203734 ()
+  testDay 21 Day21.parse Day21.part1 Day21.part2 "input/day21.txt" 203734 246810588779586
