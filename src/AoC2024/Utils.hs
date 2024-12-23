@@ -22,6 +22,10 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 import qualified AoC2024.Utils.PSQueue as PSQueue
 
+-- infixl 0 |>
+-- (|>) :: a -> (a -> b) -> b
+-- (|>) x f = f x
+
 class Indexed t i | t -> i where
   infixl 9 !, !?
   (!) :: t a -> i -> a
@@ -203,6 +207,11 @@ infixr 3 &&&
 infixr 2 |||
 (|||) :: (a -> Bool) -> (a -> Bool) -> a -> Bool
 (|||) p q x = p x || q x
+
+choose2 :: [a] -> [(a, a)]
+choose2 = \case
+  [] -> []
+  x:xs -> map (x, ) xs ++ choose2 xs
 
 -- Name comes from thinking of the list as a simplex
 faces :: [a] -> [[a]]
