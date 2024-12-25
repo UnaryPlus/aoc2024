@@ -9,7 +9,7 @@ import Data.Monoid (Sum(Sum), getSum)
 import Data.Foldable (foldMap')
 import Data.List (foldl', minimumBy, maximumBy)
 import Data.Function (on)
-import Data.Bifunctor (first)
+import Data.Bifunctor (Bifunctor, first, bimap)
 import Control.Monad.ST (runST, ST)
 import Control.Monad (forM_, filterM)
 import Data.Ix (Ix, range, inRange)
@@ -206,6 +206,9 @@ infixr 3 &&&
 infixr 2 |||
 (|||) :: (a -> Bool) -> (a -> Bool) -> a -> Bool
 (|||) p q x = p x || q x
+
+mapBoth :: Bifunctor f => (a -> b) -> f a a -> f b b
+mapBoth f = bimap f f
 
 choose2 :: [a] -> [(a, a)]
 choose2 = \case

@@ -28,7 +28,7 @@ import qualified AoC2024.Solutions.Day21 as Day21
 import qualified AoC2024.Solutions.Day22 as Day22
 import qualified AoC2024.Solutions.Day23 as Day23
 import qualified AoC2024.Solutions.Day24 as Day24
--- import qualified AoC2024.Solutions.Day25 as Day25
+import qualified AoC2024.Solutions.Day25 as Day25
 
 testDay :: (Eq b, Eq c, Show b, Show c) => Int -> (String -> a) -> (a -> b) -> (a -> c) -> FilePath -> b -> c -> IO ()
 testDay n parse part1 part2 path answer1 answer2 = do
@@ -69,3 +69,4 @@ main = do
   testDay 22 Day22.parse Day22.part1 Day22.part2 "input/day22.txt" 12759339434 1405
   testDay 23 Day23.parse Day23.part1 Day23.part2 "input/day23.txt" 1184 "hf,hz,lb,lm,ls,my,ps,qu,ra,uc,vi,xz,yv"
   testDay 24 Day24.parse Day24.part1 Day24.part2 "input/day24.txt" 64755511006320 "djg,dsd,hjm,mcq,sbg,z12,z19,z37"
+  testDay 25 Day25.parse Day25.part1 (const ()) "input/day25.txt" 3136 ()
