@@ -1,8 +1,8 @@
-module AoC2024.Solutions.Day25 (parse, part1, part2) where
+module AoC2024.Solutions.Day25 (parse, part1) where
 
 import Data.List (transpose, partition)
 import Control.Category ((>>>))
-import AoC2024.Utils
+import AoC2024.Utils (chunksOf, count, mapBoth)
 
 type Lock = [Int]
 type Key = [Int]
@@ -21,6 +21,3 @@ parse = lines
 part1 :: ([Lock], [Key]) -> Int
 part1 (locks, keys) = 
   count id [ noOverlap lock key | lock <- locks, key <- keys ]
-
-part2 :: ([Lock], [Key]) -> Int
-part2 = undefined
