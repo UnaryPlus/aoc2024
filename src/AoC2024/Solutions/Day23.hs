@@ -1,14 +1,14 @@
 module AoC2024.Solutions.Day23 (parse, part1, part2) where
 
 import Data.Map (Map)
-import qualified Data.Map as Map
-import AoC2024.Parser (partialExecParser, parseWhile, char, eof)
 import Data.Char (isAsciiLower)
 import Control.Category ((>>>))
+import Control.Monad (guard)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import AoC2024.Utils
-import Control.Monad (guard)
+import qualified Data.Map as Map
+import AoC2024.Parser (partialExecParser, parseWhile, char, eof)
+import AoC2024.Utils (choose2, count, (!), commaJoin) 
 
 triangles :: Ord a => Map a (Set a) -> Set (Set a)
 triangles graph = Set.fromList $ do
@@ -42,4 +42,4 @@ part2 :: Map String (Set String) -> String
 part2 graph = let
   tris = triangles graph
   clique = Set.filter (\x -> count (Set.member x) tris == 66) (Map.keysSet graph)
-  in foldr1 (\x str -> x ++ "," ++ str) (Set.toAscList clique)
+  in commaJoin (Set.toAscList clique)

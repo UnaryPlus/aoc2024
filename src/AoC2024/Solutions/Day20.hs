@@ -1,8 +1,8 @@
 {-# LANGUAGE TupleSections #-}
-module AoC2024.Solutions.Day20 (parse, part1, part2, walkPath) where
+module AoC2024.Solutions.Day20 (parse, part1, part2) where
 
 import qualified Data.Array as Array
-import AoC2024.Utils
+import AoC2024.Utils ((!), indexOf, indicesOf, count, Array2, fromList, neighbors, manhattanCircle)
 
 walkPath :: Array2 Bool -> (Int, Int) -> [(Int, Int)]
 walkPath = walkPath' Nothing

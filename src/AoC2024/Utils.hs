@@ -22,10 +22,6 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 import qualified AoC2024.Utils.PSQueue as PSQueue
 
--- infixl 0 |>
--- (|>) :: a -> (a -> b) -> b
--- (|>) x f = f x
-
 class Indexed t i | t -> i where
   infixl 9 !, !?
   (!) :: t a -> i -> a
@@ -200,6 +196,9 @@ minimumOn f = minimumBy (compare `on` f)
 maximumOn :: Ord b => (a -> b) -> [a] -> a
 maximumOn f = maximumBy (compare `on` f)
 
+commaJoin :: [String] -> String
+commaJoin = foldr (\x str -> if null str then x else x ++ ',' : str) ""
+
 infixr 3 &&&
 (&&&) :: (a -> Bool) -> (a -> Bool) -> a -> Bool
 (&&&) p q x = p x && q x
@@ -351,3 +350,11 @@ generalDijkstra1 startData makeData combineData getNeighbors start end =
         certain' = Set.insert node certain
         uncertain' = foldr insert (PSQueue.delete node uncertain) (getNeighbors node)
         in if node == end then Just (dist, info) else loop certain' uncertain'
+
+hasCycle :: (Foldable t, Ord a) => (a -> t a) -> a -> Bool
+hasCycle getNeighbors = hasCycle' Set.empty 
+  where
+    hasCycle' visited node =
+      let nbrs = getNeighbors node in
+      any (`Set.member` visited) nbrs
+      || any (hasCycle' (Set.insert node visited)) nbrs

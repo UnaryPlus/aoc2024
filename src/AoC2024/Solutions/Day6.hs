@@ -13,7 +13,7 @@ type Direction = (Int, Int)
 guardLoop :: Array2 Bool -> (Int, Int) -> Direction -> STArray2 s (Set Direction) -> ST s Bool
 guardLoop grid pos dir history = do
   prevDirs <- readArray history pos
-  if dir `elem` prevDirs then return True
+  if Set.member dir prevDirs then return True
   else do
     writeArray history pos (Set.insert dir prevDirs)
     let pos' = add2 pos dir

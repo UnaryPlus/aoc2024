@@ -2,11 +2,11 @@
 module AoC2024.Solutions.Day22 (parse, part1, part2) where
 
 import Data.Bits (xor, (.&.), shiftR, shiftL)
-import AoC2024.Utils
+import Control.Monad (forM_)
+import Control.Monad.ST (ST, runST)
 import Data.Array.ST (STArray, modifyArray', newArray)
 import qualified Data.Map as Map
-import Control.Monad.ST
-import Control.Monad
+import AoC2024.Utils (freeze, nest, sumMap)
 
 type Int4 = (Int, Int, Int, Int)
 

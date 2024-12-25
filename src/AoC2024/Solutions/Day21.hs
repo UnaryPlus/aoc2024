@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TupleSections #-}
-module AoC2024.Solutions.Day21 where -- (parse, part1, part2) where
+module AoC2024.Solutions.Day21 (parse, part1, part2) where
 
 import Data.Map (Map)
 import qualified Data.Map as Map

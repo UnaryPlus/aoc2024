@@ -18,7 +18,7 @@ obeys forbidden = loop Set.empty
   where
     loop fs = \case
       [] -> True
-      x:xs | x `elem` fs -> False
+      x:xs | Set.member x fs -> False
            | otherwise -> loop (Map.findWithDefault Set.empty x forbidden <> fs) xs
 
 tsort :: Ord a => Map a (Set a) -> [a] -> [a]

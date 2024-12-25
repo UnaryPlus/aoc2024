@@ -1,5 +1,4 @@
-{-# LANGUAGE LambdaCase #-}
-module AoC2024.Solutions.Day13 (parse, part1, part2, solve) where
+module AoC2024.Solutions.Day13 (parse, part1, part2) where
 
 import Data.Maybe (mapMaybe)
 import Data.Bifunctor (bimap, second)

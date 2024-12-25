@@ -1,8 +1,8 @@
 module AoC2024.Solutions.Day12 (parse, part1, part2) where
 
-import Control.Monad
-import Control.Monad.ST
-import Data.STRef
+import Control.Monad (forM_, when)
+import Control.Monad.ST (ST, runST)
+import Data.STRef (newSTRef, readSTRef, modifySTRef')
 import qualified Data.Map as Map
 import Data.Array.ST (newArray, readArray, writeArray)
 import Data.Ix (range)
